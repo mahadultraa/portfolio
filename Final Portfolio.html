@@ -1,0 +1,1928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>veileds.xyz — Full-Stack Duo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================= TOKENS ============================= */
+:root{
+  --bg:#0a0c0b;
+  --bg-soft:#0d100e;
+  --surface:#141715;
+  --surface-2:#191d1b;
+  --border:#262b28;
+  --border-soft:#1d211f;
+  --text:#eceeeb;
+  --text-muted:#8d948f;
+  --text-dim:#5d635f;
+  --green:#5fcf8e;
+  --green-soft:#8fe3b8;
+  --green-dim:#2c5940;
+  --grey-line:#3a413d;
+
+  --font-display:'Space Grotesk', sans-serif;
+  --font-mono:'JetBrains Mono', monospace;
+  --font-body:'Inter', sans-serif;
+
+  --container:1160px;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  line-height:1.5;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:"";
+  position:fixed;inset:0;
+  background-image:
+    radial-gradient(circle at 15% 8%, rgba(95,207,142,0.05), transparent 40%),
+    radial-gradient(circle at 85% 30%, rgba(95,207,142,0.04), transparent 45%);
+  pointer-events:none;
+  z-index:0;
+}
+img,svg{display:block;max-width:100%;}
+a{color:inherit;text-decoration:none;}
+ul{list-style:none;}
+button{font:inherit;}
+
+/* ============================= CUSTOM CURSOR ============================= */
+:root{
+  --cursor-plus: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30"><circle cx="15" cy="15" r="12.5" fill="%23eef7f1" fill-opacity="0.14"/><circle cx="15" cy="15" r="12.5" fill="none" stroke="%235fcf8e" stroke-opacity="0.35" stroke-width="1"/><path d="M15 7v16M7 15h16" stroke="%235fcf8e" stroke-width="2.4" stroke-linecap="round"/></svg>') 15 15, auto;
+}
+@media (hover:hover) and (pointer:fine){
+  html, body{ cursor:var(--cursor-plus); }
+  a, button, .btn, .visit-btn, .story-node, input, select, textarea, .close-modal, [role="button"]{ cursor:var(--cursor-plus); }
+  input[type="text"], input[type="email"], input[type="tel"], textarea{ cursor:text; }
+}
+
+.wrap{max-width:var(--container);margin:0 auto;padding:0 32px;}
+section{position:relative;z-index:1;}
+
+::selection{background:var(--green-dim);color:var(--green-soft);}
+
+/* scrollbar */
+::-webkit-scrollbar{width:10px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px;}
+
+/* focus visibility */
+a:focus-visible, button:focus-visible{
+  outline:2px solid var(--green);
+  outline-offset:3px;
+  border-radius:4px;
+}
+
+/* ============================= UTIL ============================= */
+.eyebrow{
+  font-family:var(--font-mono);
+  font-size:12.5px;
+  letter-spacing:0.06em;
+  color:var(--green-soft);
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  text-transform:none;
+}
+.eyebrow::before{
+  content:"";
+  width:7px;height:7px;
+  border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 0 3px var(--green-dim);
+}
+.section-head{
+  max-width:640px;
+  margin-bottom:56px;
+}
+.section-head h2{
+  font-family:var(--font-display);
+  font-size:clamp(28px,4vw,42px);
+  font-weight:600;
+  letter-spacing:-0.01em;
+  margin-top:14px;
+  line-height:1.15;
+}
+.section-head p{
+  color:var(--text-muted);
+  margin-top:14px;
+  font-size:16px;
+  max-width:520px;
+}
+.section-pad{padding:120px 0;}
+@media (max-width:768px){ .section-pad{padding:80px 0;} }
+@media (max-width:480px){ .section-pad{padding:60px 0;} }
+
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:14px 26px;
+  border-radius:8px;
+  font-family:var(--font-mono);
+  font-size:14px;
+  font-weight:500;
+  border:1px solid transparent;
+  transition:transform .25s ease, box-shadow .25s ease, background .25s ease, border-color .25s ease, color .25s ease;
+  white-space:nowrap;
+}
+.btn-primary{
+  background:var(--green);
+  color:#08130d;
+}
+.btn-primary:hover{
+  transform:translateY(-2px);
+  box-shadow:0 10px 30px -8px rgba(95,207,142,0.45);
+}
+.btn-ghost{
+  border-color:var(--border);
+  color:var(--text);
+  background:rgba(255,255,255,0.02);
+}
+.btn-ghost:hover{
+  border-color:var(--green-dim);
+  color:var(--green-soft);
+  transform:translateY(-2px);
+}
+.btn-sm{padding:10px 18px;font-size:13px;}
+.btn svg{width:15px;height:15px;flex-shrink:0;}
+
+.tag{
+  font-family:var(--font-mono);
+  font-size:11.5px;
+  padding:5px 10px;
+  border:1px solid var(--border);
+  border-radius:6px;
+  color:var(--text-muted);
+  background:var(--surface-2);
+}
+
+/* reveal-on-scroll */
+.reveal{
+  opacity:0;
+  transform:translateY(24px);
+  transition:opacity .7s cubic-bezier(.16,.84,.44,1), transform .7s cubic-bezier(.16,.84,.44,1);
+}
+.reveal.in{opacity:1;transform:translateY(0);}
+.reveal-stagger.in > *{transition-delay:calc(var(--i) * 80ms);}
+
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto;}
+  *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important;}
+  .reveal{opacity:1;transform:none;}
+}
+
+/* ============================= NAV ============================= */
+header{
+  position:fixed;top:0;left:0;right:0;
+  z-index:100;
+  padding:18px 0;
+  transition:background .3s ease, border-color .3s ease, padding .3s ease;
+  border-bottom:1px solid transparent;
+}
+header.scrolled{
+  background:rgba(10,12,11,0.82);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  border-color:var(--border-soft);
+  padding:14px 0;
+}
+nav{
+  display:flex;align-items:center;justify-content:space-between;
+}
+.logo{
+  display:flex;align-items:center;gap:10px;
+  font-family:var(--font-display);
+  font-weight:600;
+  font-size:18px;
+  letter-spacing:-0.01em;
+}
+.logo .mark{
+  width:30px;height:30px;
+  border-radius:8px;
+  border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  background:var(--surface);
+}
+.logo .mark svg{width:15px;height:15px;}
+.logo .amp{color:var(--green-soft);}
+
+.nav-links{
+  display:flex;align-items:center;gap:34px;
+}
+.nav-links a{
+  font-family:var(--font-mono);
+  font-size:13.5px;
+  color:var(--text-muted);
+  position:relative;
+  padding:4px 0;
+  transition:color .2s ease;
+}
+.nav-links a:hover{color:var(--text);}
+.nav-links a::after{
+  content:"";
+  position:absolute;left:0;bottom:-2px;
+  width:0;height:1px;
+  background:var(--green);
+  transition:width .25s ease;
+}
+.nav-links a:hover::after{width:100%;}
+
+.nav-cta{display:flex;align-items:center;gap:18px;}
+.nav-toggle{
+  display:none;
+  flex-direction:column;gap:5px;
+  background:none;border:none;
+  padding:6px;
+}
+.nav-toggle span{width:20px;height:1.5px;background:var(--text);}
+
+.mobile-menu{
+  position:fixed;inset:0;
+  background:var(--bg);
+  z-index:99;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:28px;
+  opacity:0;pointer-events:none;
+  transition:opacity .3s ease;
+}
+.mobile-menu.open{opacity:1;pointer-events:auto;}
+.mobile-menu a{font-family:var(--font-display);font-size:26px;}
+.mobile-menu .btn{margin-top:10px;}
+
+@media (max-width:860px){
+  .nav-links{display:none;}
+  .nav-toggle{display:flex;}
+  .nav-cta .btn-ghost{display:none;}
+}
+@media (max-width:520px){
+  .nav-cta .btn-primary{display:none;}
+  .wrap{padding:0 20px;}
+}
+
+/* ============================= HERO ============================= */
+.hero{
+  padding:168px 0 100px;
+  display:grid;
+  grid-template-columns:1.05fr 0.95fr;
+  gap:40px;
+  align-items:center;
+}
+.hero-copy h1{
+  font-family:var(--font-display);
+  font-size:clamp(38px,5.4vw,64px);
+  line-height:1.06;
+  letter-spacing:-0.02em;
+  font-weight:600;
+  margin-top:18px;
+}
+.hero-copy h1 .fade{color:var(--text-dim);}
+.hero-copy p.lead{
+  margin-top:22px;
+  font-size:17px;
+  color:var(--text-muted);
+  max-width:480px;
+}
+.hero-actions{
+  margin-top:34px;
+  display:flex;gap:14px;flex-wrap:wrap;
+}
+.hero-stats{
+  margin-top:52px;
+  display:flex;gap:36px;
+  flex-wrap:wrap;
+  padding-top:28px;
+  border-top:1px solid var(--border-soft);
+  max-width:520px;
+}
+.hero-stats .stat b{
+  display:block;
+  font-family:var(--font-display);
+  font-size:24px;
+  color:var(--text);
+}
+.hero-stats .stat span{
+  font-family:var(--font-mono);
+  font-size:11.5px;
+  color:var(--text-dim);
+}
+
+.hero-graph{position:relative;}
+.hero-graph .frame{
+  border:1px solid var(--border);
+  border-radius:14px;
+  background:linear-gradient(160deg, var(--surface), var(--bg-soft));
+  padding:26px 22px 20px;
+  position:relative;
+  overflow:hidden;
+}
+.hero-graph .frame::before{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(circle at 70% 20%, rgba(95,207,142,0.08), transparent 60%);
+}
+.frame-topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  font-family:var(--font-mono);
+  font-size:11px;
+  color:var(--text-dim);
+  margin-bottom:6px;
+}
+.frame-dots{display:flex;gap:6px;}
+.frame-dots span{width:8px;height:8px;border-radius:50%;background:var(--border);}
+
+.git-line{stroke:var(--grey-line);stroke-width:2.2;fill:none;stroke-linecap:round;}
+.git-line-accent{stroke:var(--green);stroke-width:2.2;fill:none;stroke-linecap:round;}
+.git-dot{fill:var(--surface-2);stroke:var(--grey-line);stroke-width:1.6;}
+.git-dot-accent{fill:var(--green);stroke:var(--green);}
+.git-label{font-family:var(--font-mono);font-size:10.5px;fill:var(--text-dim);}
+.git-label-accent{font-family:var(--font-mono);font-size:10.5px;fill:var(--green-soft);}
+
+.draw{
+  stroke-dasharray:400;
+  stroke-dashoffset:400;
+  animation:draw 1.6s cubic-bezier(.4,0,.2,1) forwards;
+}
+.draw-delay{animation-delay:.15s;}
+@keyframes draw{ to{stroke-dashoffset:0;} }
+
+.pulse-dot{ animation:pop .5s ease forwards; opacity:0; transform-origin:center; }
+@keyframes pop{ from{opacity:0;transform:scale(0);} to{opacity:1;transform:scale(1);} }
+
+@media (max-width:900px){
+  .hero{grid-template-columns:1fr;padding-top:140px;}
+  .hero-graph{order:-1;}
+}
+@media (max-width:480px){
+  .hero{padding-top:120px;padding-bottom:70px;}
+  .hero-stats{gap:22px;}
+  .hero-actions .btn{width:100%;}
+}
+
+/* ============================= TICKER ============================= */
+.ticker-section{
+  border-top:1px solid var(--border-soft);
+  border-bottom:1px solid var(--border-soft);
+  padding:26px 0;
+  overflow:hidden;
+  background:var(--bg-soft);
+}
+.ticker-track{
+  display:flex;
+  width:max-content;
+  gap:54px;
+  animation:ticker 32s linear infinite;
+}
+.ticker-track span{
+  font-family:var(--font-mono);
+  font-size:14px;
+  color:var(--text-dim);
+  white-space:nowrap;
+  display:flex;align-items:center;gap:10px;
+}
+.ticker-track span::before{content:"//";color:var(--green-dim);}
+@keyframes ticker{ from{transform:translateX(0);} to{transform:translateX(-50%);} }
+
+/* ============================= STACK / SERVICES ============================= */
+.stack-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:1px;
+  background:var(--border-soft);
+  border:1px solid var(--border-soft);
+  border-radius:14px;
+  overflow:hidden;
+}
+.stack-card{
+  background:var(--bg);
+  padding:32px 26px;
+  transition:background .3s ease;
+}
+.stack-card:hover{background:var(--surface);}
+.stack-card .num{
+  font-family:var(--font-mono);
+  font-size:11.5px;
+  color:var(--green-soft);
+}
+.stack-card h3{
+  font-family:var(--font-display);
+  font-size:19px;
+  margin-top:14px;
+  font-weight:600;
+}
+.stack-card p{
+  color:var(--text-muted);
+  font-size:14px;
+  margin-top:10px;
+  line-height:1.55;
+}
+.stack-card .chips{
+  margin-top:16px;
+  display:flex;flex-wrap:wrap;gap:6px;
+}
+@media (max-width:900px){ .stack-grid{grid-template-columns:1fr 1fr;} }
+@media (max-width:560px){ .stack-grid{grid-template-columns:1fr;} }
+
+/* ============================= PROCESS (branches) ============================= */
+.process{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:0;
+  border:1px solid var(--border-soft);
+  border-radius:14px;
+  overflow:hidden;
+}
+.branch-col{
+  padding:34px 30px;
+  position:relative;
+}
+.branch-col.you{
+  background:var(--surface);
+  border-right:1px solid var(--border-soft);
+}
+.branch-col.partner{
+  background:var(--surface);
+}
+.branch-tag{
+  font-family:var(--font-mono);
+  font-size:11.5px;
+  color:var(--text-dim);
+  display:flex;align-items:center;gap:8px;
+}
+.branch-tag .chip{
+  width:8px;height:8px;border-radius:2px;
+  background:var(--grey-line);
+}
+.branch-col.partner .branch-tag .chip{background:var(--grey-line);}
+.branch-col h4{
+  font-family:var(--font-display);
+  font-size:20px;
+  margin-top:10px;
+}
+.branch-steps{margin-top:22px;display:flex;flex-direction:column;gap:16px;}
+.branch-steps li{
+  display:flex;gap:14px;
+  font-size:14px;
+  color:var(--text-muted);
+}
+.branch-steps li .n{
+  font-family:var(--font-mono);
+  font-size:11.5px;
+  color:var(--text-dim);
+  flex-shrink:0;
+  padding-top:1px;
+}
+.merge-row{
+  grid-column:1 / -1;
+  border-top:1px solid var(--border-soft);
+  padding:26px 30px;
+  display:flex;align-items:center;gap:16px;
+  background:var(--bg-soft);
+  font-family:var(--font-mono);
+  font-size:13px;
+  color:var(--green-soft);
+}
+.merge-row svg{width:16px;height:16px;flex-shrink:0;}
+@media (max-width:760px){
+  .process{grid-template-columns:1fr;}
+  .branch-col.you{border-right:none;border-bottom:1px solid var(--border-soft);}
+}
+
+/* ============================= STORY (scroll-driven) ============================= */
+.story-section{}
+.story-section.section-pad{padding:70px 0 60px;}
+.story-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:40px;
+  align-items:start;
+  margin-top:6px;
+}
+.story-steps{display:flex;flex-direction:column;}
+.story-step{
+  min-height:30vh;
+  display:flex;flex-direction:column;justify-content:center;
+  padding:0 20px 0 24px;
+  opacity:.32;
+  transform:translateX(-14px);
+  transition:opacity .5s cubic-bezier(.16,.84,.44,1), transform .5s cubic-bezier(.16,.84,.44,1), border-color .5s ease;
+  border-left:2px solid var(--border-soft);
+}
+.story-step.active{
+  opacity:1;
+  transform:translateX(0);
+  border-left-color:var(--green);
+}
+.story-step-num{
+  font-family:var(--font-mono);
+  font-size:12px;
+  color:var(--text-dim);
+  transition:color .4s ease;
+}
+.story-step.active .story-step-num{color:var(--green-soft);}
+.story-step-tag{
+  display:block;
+  font-family:var(--font-mono);
+  font-size:11px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--green-soft);
+  margin-top:8px;
+}
+.story-step h3{
+  font-family:var(--font-display);
+  font-size:clamp(19px,2.2vw,25px);
+  margin-top:8px;
+  font-weight:600;
+  letter-spacing:-0.01em;
+}
+.story-step p{
+  color:var(--text-muted);
+  margin-top:10px;
+  max-width:380px;
+  font-size:14.5px;
+  line-height:1.6;
+}
+
+.story-visual-col{
+  position:sticky;
+  top:0;
+  height:100vh;
+  display:flex;align-items:center;justify-content:center;
+  z-index:5;
+  pointer-events:none;
+}
+.story-visual-col > *{pointer-events:auto;}
+.story-visual{
+  position:relative;
+  width:320px;height:320px;
+  max-width:100%;
+}
+.story-glow{
+  position:absolute;inset:-32px;
+  background:radial-gradient(circle, rgba(95,207,142,0.22), transparent 65%);
+  filter:blur(10px);
+  border-radius:50%;
+  animation:storyPulse 4s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes storyPulse{ 0%,100%{opacity:.65;transform:scale(1);} 50%{opacity:1;transform:scale(1.06);} }
+
+.story-rings{position:absolute;inset:0;width:100%;height:100%;overflow:visible;}
+.story-rings .ring{fill:none;stroke:var(--border);stroke-width:1;transform-origin:160px 160px;}
+.story-rings .ring-1{animation:storySpin 34s linear infinite;}
+.story-rings .ring-2{animation:storySpin 50s linear infinite reverse;}
+.story-rings .ring-3{stroke:var(--border-soft);}
+@keyframes storySpin{ to{transform:rotate(360deg);} }
+
+.progress-ring{
+  fill:none;
+  stroke:var(--green);
+  stroke-width:2;
+  stroke-linecap:round;
+  transform:rotate(-90deg);
+  transform-origin:160px 160px;
+  filter:drop-shadow(0 0 6px rgba(95,207,142,.55));
+  transition:stroke-dashoffset .4s cubic-bezier(.16,.84,.44,1);
+}
+
+.story-center{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  text-align:center;
+  font-family:var(--font-display);
+  pointer-events:none;
+}
+.story-count{font-size:34px;font-weight:600;color:var(--text);transition:color .3s ease;}
+.story-total{display:block;font-family:var(--font-mono);font-size:12px;color:var(--text-dim);margin-top:2px;}
+
+.story-node{
+  position:absolute;top:50%;left:50%;
+  width:46px;height:46px;
+  transform:translate(calc(-50% + var(--nx)), calc(-50% + var(--ny)));
+  border-radius:13px;
+  border:1px solid var(--border);
+  background:var(--surface);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text-dim);
+  transition:color .4s ease, border-color .4s ease, background .4s ease, transform .4s cubic-bezier(.16,.84,.44,1), box-shadow .4s ease;
+}
+.story-node svg{width:20px;height:20px;}
+.story-node.active{
+  color:var(--green-soft);
+  border-color:var(--green-dim);
+  background:var(--surface-2);
+  box-shadow:0 0 24px -4px rgba(95,207,142,.55);
+  transform:translate(calc(-50% + var(--nx)), calc(-50% + var(--ny))) scale(1.16);
+}
+
+.story-topbar{position:absolute;top:-38px;left:0;right:0;font-size:11px;}
+
+/* ============================= STORY — AMBIENT TECH ICONS ============================= */
+.tech-float{
+  position:absolute;
+  left:50%;
+  width:52px;height:52px;
+  border-radius:13px;
+  border:1px solid var(--border);
+  background:var(--surface-2);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-mono);
+  font-size:12.5px;
+  font-weight:600;
+  color:var(--text-dim);
+  opacity:.55;
+  transform:translate(calc(-50% + var(--fx,0px)), var(--fy,0px));
+  animation:techFloat 6s ease-in-out infinite;
+  animation-delay:var(--fd,0s);
+  z-index:1;
+}
+.tech-float svg{width:24px;height:24px;}
+.tech-float:hover{opacity:1;border-color:var(--green-dim);color:var(--green-soft);}
+@keyframes techFloat{
+  0%,100%{transform:translate(calc(-50% + var(--fx,0px)), var(--fy,0px));}
+  50%{transform:translate(calc(-50% + var(--fx,0px)), calc(var(--fy,0px) - 10px));}
+}
+@media (max-width:960px){ .tech-float{display:none;} }
+
+@media (max-width:960px){
+  .story-grid{grid-template-columns:1fr;}
+  .story-visual-col{position:static;height:auto;max-height:none;margin-bottom:32px;order:-1;}
+  .story-visual{width:260px;height:260px;margin:0 auto;}
+  .story-step{min-height:auto;padding:18px 4px;}
+}
+
+/* ============================= PROJECTS ============================= */
+.projects-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:26px;
+}
+.project-card{
+  border:1px solid var(--border);
+  border-radius:14px;
+  overflow:hidden;
+  background:var(--surface);
+  transition:transform .35s ease, border-color .35s ease, box-shadow .35s ease;
+  display:flex;flex-direction:column;
+}
+.project-card:hover{
+  transform:translateY(-6px);
+  border-color:var(--green-dim);
+  box-shadow:0 20px 40px -20px rgba(0,0,0,0.6);
+}
+.project-thumb{
+  height:170px;
+  position:relative;
+  display:flex;align-items:flex-end;
+  padding:16px 18px;
+  overflow:hidden;
+  border-bottom:1px solid var(--border);
+}
+.project-thumb::before{
+  content:"";position:absolute;inset:0;
+  opacity:.9;
+}
+.project-thumb .thumb-topbar{
+  position:absolute;top:12px;left:16px;right:16px;
+  display:flex;justify-content:space-between;align-items:center;
+  z-index:2;
+}
+.project-thumb .thumb-dots{display:flex;gap:5px;}
+.project-thumb .thumb-dots span{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.25);}
+.project-thumb .thumb-label{
+  font-family:var(--font-mono);
+  font-size:11px;
+  color:rgba(255,255,255,0.55);
+}
+.project-thumb .thumb-title{
+  position:relative;z-index:2;
+  font-family:var(--font-display);
+  font-size:22px;
+  font-weight:600;
+  color:rgba(255,255,255,0.92);
+  line-height:1.15;
+}
+.project-body{
+  padding:22px;
+  display:flex;flex-direction:column;gap:14px;
+  flex:1;
+}
+.project-body .p-tags{display:flex;flex-wrap:wrap;gap:6px;}
+.project-body p{color:var(--text-muted);font-size:14px;line-height:1.6;}
+.project-footer{
+  margin-top:auto;
+  display:flex;align-items:center;justify-content:space-between;
+  padding-top:6px;
+}
+.project-role{
+  font-family:var(--font-mono);
+  font-size:11px;
+  color:var(--text-dim);
+}
+.visit-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:var(--font-mono);
+  font-size:12.5px;
+  color:var(--green-soft);
+  border:1px solid var(--green-dim);
+  padding:8px 14px;
+  border-radius:7px;
+  transition:background .25s ease, color .25s ease, transform .2s ease;
+}
+.visit-btn svg{width:12px;height:12px;transition:transform .25s ease;}
+.visit-btn:hover{
+  background:var(--green);
+  color:#08130d;
+  transform:translateX(2px);
+}
+.visit-btn:hover svg{transform:translate(2px,-2px);}
+.visit-btn.disabled{
+  opacity:.45;
+  pointer-events:none;
+}
+
+.project-card.open-slot{
+  border:1.5px dashed var(--border);
+  background:transparent;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:280px;
+  transition:border-color .3s ease, transform .3s ease;
+}
+.project-card.open-slot:hover{
+  border-color:var(--green-dim);
+  transform:translateY(-6px);
+}
+.open-slot-inner{
+  text-align:center;
+  padding:30px;
+}
+.open-slot-icon{
+  width:42px;height:42px;
+  margin:0 auto 16px;
+  border-radius:50%;
+  border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--green-soft);
+}
+.open-slot-inner h3{
+  font-family:var(--font-display);
+  font-size:17px;
+  font-weight:600;
+  color:var(--text-muted);
+}
+.open-slot-inner p{
+  color:var(--text-dim);
+  font-size:13.5px;
+  margin-top:8px;
+  max-width:220px;
+  margin-left:auto;margin-right:auto;
+}
+
+@media (max-width:760px){ .projects-grid{grid-template-columns:1fr;} }
+
+/* ============================= CONTACT ============================= */
+.contact-panel{
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:64px 48px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+  background:radial-gradient(circle at 50% 0%, rgba(95,207,142,0.07), transparent 60%), var(--surface);
+}
+.contact-panel .eyebrow{justify-content:center;}
+.contact-panel h2{
+  font-family:var(--font-display);
+  font-size:clamp(30px,4.6vw,46px);
+  font-weight:600;
+  margin-top:16px;
+  line-height:1.15;
+}
+.contact-panel p{
+  color:var(--text-muted);
+  max-width:460px;
+  margin:18px auto 0;
+}
+.contact-actions{
+  margin-top:34px;
+  display:flex;
+  gap:14px;
+  justify-content:center;
+  flex-wrap:wrap;
+}
+.icon-links{
+  margin-top:38px;
+  display:flex;gap:16px;justify-content:center;
+}
+.icon-links a{
+  width:42px;height:42px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text-muted);
+  transition:border-color .25s ease, color .25s ease, transform .25s ease;
+}
+.icon-links a:hover{
+  border-color:var(--green-dim);
+  color:var(--green-soft);
+  transform:translateY(-3px);
+}
+.icon-links svg{width:18px;height:18px;}
+
+@media (max-width:600px){
+  .contact-panel{padding:44px 24px;}
+}
+
+footer{
+  border-top:1px solid var(--border-soft);
+  padding:44px 0 28px;
+}
+.footer-top{
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;
+  gap:20px;
+  padding-bottom:24px;
+  border-bottom:1px solid var(--border-soft);
+}
+.footer-logo{
+  display:flex;align-items:center;gap:9px;
+  font-family:var(--font-display);
+  font-weight:600;
+  font-size:15px;
+}
+.footer-logo .mark{
+  width:26px;height:26px;
+  border-radius:7px;
+  border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  background:var(--surface);
+  flex-shrink:0;
+}
+.footer-logo .mark svg{width:13px;height:13px;}
+.footer-logo .amp{color:var(--green-soft);}
+
+.footer-nav{
+  display:flex;align-items:center;gap:24px;
+  flex-wrap:wrap;
+}
+.footer-nav a{
+  font-family:var(--font-mono);
+  font-size:12.5px;
+  color:var(--text-muted);
+  transition:color .2s ease;
+}
+.footer-nav a:hover{color:var(--text);}
+
+.footer-social{display:flex;gap:10px;}
+.footer-social a{
+  width:32px;height:32px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text-muted);
+  transition:border-color .25s ease, color .25s ease, transform .25s ease;
+}
+.footer-social a:hover{
+  border-color:var(--green-dim);
+  color:var(--green-soft);
+  transform:translateY(-2px);
+}
+.footer-social svg{width:15px;height:15px;}
+
+.footer-bottom{
+  margin-top:20px;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;
+  gap:10px;
+  font-family:var(--font-mono);
+  font-size:11.5px;
+  color:var(--text-dim);
+}
+.footer-bottom a{color:var(--text-dim);transition:color .2s ease;}
+.footer-bottom a:hover{color:var(--green-soft);}
+
+@media (max-width:640px){
+  .footer-top{justify-content:center;text-align:center;flex-direction:column;gap:18px;}
+  .footer-bottom{justify-content:center;text-align:center;flex-direction:column;gap:8px;}
+}
+
+/* ============================= AVAILABILITY BADGE ============================= */
+.availability-badge{
+  display:inline-flex;align-items:center;gap:9px;
+  margin-top:16px;
+  padding:7px 14px 7px 11px;
+  border:1px solid var(--border);
+  border-radius:100px;
+  background:var(--surface-2);
+  font-family:var(--font-mono);
+  font-size:12.5px;
+  color:var(--text-muted);
+}
+.availability-badge .dot{
+  width:8px;height:8px;
+  border-radius:50%;
+  background:var(--status-color, var(--green));
+  box-shadow:0 0 0 3px color-mix(in srgb, var(--status-color, var(--green)) 25%, transparent);
+  animation:statusPulse 2.2s ease-in-out infinite;
+  flex-shrink:0;
+}
+@keyframes statusPulse{
+  0%,100%{ box-shadow:0 0 0 3px color-mix(in srgb, var(--status-color, var(--green)) 25%, transparent); }
+  50%{ box-shadow:0 0 0 6px color-mix(in srgb, var(--status-color, var(--green)) 12%, transparent); }
+}
+.availability-badge .status-text{color:var(--text);}
+
+/* ============================= DISCORD PROJECTS ============================= */
+.discord-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:26px;
+}
+.discord-card{
+  border:1px solid var(--border);
+  border-radius:14px;
+  background:linear-gradient(160deg, var(--surface), var(--bg-soft));
+  padding:30px 28px;
+  position:relative;
+  overflow:hidden;
+  transition:border-color .35s ease, box-shadow .35s ease;
+}
+.discord-card::before{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(circle at 85% -10%, rgba(95,207,142,0.10), transparent 55%);
+  pointer-events:none;
+}
+.discord-card:hover{
+  border-color:var(--green-dim);
+  box-shadow:0 24px 46px -24px rgba(0,0,0,0.65);
+}
+.discord-card-icon{
+  width:44px;height:44px;
+  border-radius:11px;
+  border:1px solid var(--border);
+  background:var(--surface-2);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--green-soft);
+  margin-bottom:18px;
+  position:relative;z-index:1;
+}
+.discord-card-icon svg{width:22px;height:22px;}
+.discord-card h3{
+  font-family:var(--font-display);
+  font-size:20px;
+  font-weight:600;
+  position:relative;z-index:1;
+}
+.discord-stats{
+  display:flex;gap:28px;
+  margin-top:16px;
+  flex-wrap:wrap;
+  position:relative;z-index:1;
+}
+.discord-stats .stat b{
+  display:block;
+  font-family:var(--font-display);
+  font-size:26px;
+  color:var(--green-soft);
+}
+.discord-stats .stat span{
+  font-family:var(--font-mono);
+  font-size:11px;
+  color:var(--text-dim);
+}
+.discord-card p{
+  color:var(--text-muted);
+  font-size:14px;
+  line-height:1.6;
+  margin-top:16px;
+  position:relative;z-index:1;
+}
+.discord-card .p-tags{
+  margin-top:18px;
+  display:flex;flex-wrap:wrap;gap:6px;
+  position:relative;z-index:1;
+}
+@media (max-width:760px){ .discord-grid{grid-template-columns:1fr;} }
+
+/* ============================= OPEN SLOT AD ============================= */
+.open-slot-inner .btn{margin-top:18px;}
+.project-card.open-slot{
+  background:radial-gradient(circle at 50% 20%, rgba(95,207,142,0.06), transparent 65%);
+}
+
+/* ============================= 3D TILT ============================= */
+.projects-grid,.discord-grid,.stack-grid{perspective:1200px;}
+.project-card,.discord-card,.stack-card{
+  transform-style:preserve-3d;
+  will-change:transform;
+}
+.hero-graph .frame{
+  transform-style:preserve-3d;
+  transition:transform .1s ease-out;
+  will-change:transform;
+}
+.hero-graph{perspective:1000px;}
+
+/* ============================= CONTACT MODAL ============================= */
+.modal-overlay{
+  position:fixed;inset:0;
+  z-index:200;
+  background:rgba(6,8,7,0.72);
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+  display:flex;align-items:center;justify-content:center;
+  padding:24px;
+  opacity:0;pointer-events:none;
+  transition:opacity .28s ease;
+}
+.modal-overlay.open{opacity:1;pointer-events:auto;}
+.modal-panel{
+  width:100%;max-width:520px;
+  max-height:88vh;
+  overflow-y:auto;
+  background:radial-gradient(circle at 50% 0%, rgba(95,207,142,0.08), transparent 60%), var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:38px 34px 30px;
+  position:relative;
+  transform:translateY(18px) scale(.98);
+  transition:transform .3s cubic-bezier(.16,.84,.44,1);
+}
+.modal-overlay.open .modal-panel{transform:translateY(0) scale(1);}
+.close-modal{
+  position:absolute;top:18px;right:18px;
+  width:34px;height:34px;
+  border-radius:9px;
+  border:1px solid var(--border);
+  background:var(--surface-2);
+  color:var(--text-muted);
+  display:flex;align-items:center;justify-content:center;
+  transition:border-color .2s ease, color .2s ease;
+}
+.close-modal svg{width:16px;height:16px;}
+.close-modal:hover{border-color:var(--green-dim);color:var(--green-soft);}
+
+.modal-head h3{
+  font-family:var(--font-display);
+  font-size:clamp(21px,3vw,26px);
+  font-weight:600;
+  margin-top:12px;
+  letter-spacing:-0.01em;
+}
+.modal-head p{
+  color:var(--text-muted);
+  font-size:14px;
+  margin-top:8px;
+}
+
+#contactForm{margin-top:26px;display:flex;flex-direction:column;gap:16px;}
+.form-row{display:flex;flex-direction:column;gap:7px;}
+.form-row-split{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.form-row label{
+  font-family:var(--font-mono);
+  font-size:12px;
+  color:var(--text-muted);
+}
+.form-row label .optional{color:var(--text-dim);}
+.form-row input,
+.form-row select,
+.form-row textarea{
+  width:100%;
+  background:var(--bg-soft);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:11px 13px;
+  color:var(--text);
+  font-family:var(--font-body);
+  font-size:14px;
+  transition:border-color .2s ease, box-shadow .2s ease;
+}
+.form-row textarea{resize:vertical;min-height:70px;}
+.form-row input::placeholder,
+.form-row textarea::placeholder{color:var(--text-dim);}
+.form-row input:focus,
+.form-row select:focus,
+.form-row textarea:focus{
+  outline:none;
+  border-color:var(--green-dim);
+  box-shadow:0 0 0 3px rgba(95,207,142,0.12);
+}
+.form-row select{ appearance:none; -webkit-appearance:none;
+  background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%238d948f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>');
+  background-repeat:no-repeat;
+  background-position:right 12px center;
+  background-size:16px;
+  padding-right:34px;
+}
+.form-row input[required]:invalid, .form-row select[required]:invalid{}
+.form-submit{width:100%;margin-top:4px;}
+.form-submit svg{width:15px;height:15px;flex-shrink:0;}
+.form-note{
+  font-family:var(--font-mono);
+  font-size:11.5px;
+  color:var(--text-dim);
+  text-align:center;
+  margin-top:2px;
+  line-height:1.5;
+}
+
+@media (max-width:560px){
+  .modal-panel{padding:30px 22px 24px;}
+  .form-row-split{grid-template-columns:1fr;}
+}
+
+/* section divider label */
+.divider-label{
+  display:flex;align-items:center;gap:14px;
+  font-family:var(--font-mono);
+  font-size:11px;
+  color:var(--text-dim);
+  margin-bottom:14px;
+}
+.divider-label::after{
+  content:"";flex:1;height:1px;background:var(--border-soft);
+}
+</style>
+</head>
+<body>
+
+<header id="site-header">
+  <div class="wrap">
+    <nav>
+      <a href="#top" class="logo">
+        <span class="mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#5fcf8e" stroke-width="2" stroke-linecap="round"><circle cx="6" cy="6" r="2.4"/><circle cx="6" cy="18" r="2.4"/><circle cx="18" cy="12" r="2.4"/><path d="M6 8.4V15.6M8 6.9C11 6.9 15.7 8.5 15.9 10.4M8 17.1c3-.1 7.7-1.7 7.9-3.6"/></svg>
+        </span>
+        veileds<span class="amp">.xyz</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#work">Work</a></li>
+        <li><a href="#discord">Discord</a></li>
+        <li><a href="#stack">Stack</a></li>
+        <li><a href="#process">Process</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+      <div class="nav-cta">
+        <a href="#contact" class="btn btn-primary btn-sm">Start a project</a>
+        <button class="nav-toggle" id="navToggle" aria-label="Open menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#work">Work</a>
+  <a href="#discord">Discord</a>
+  <a href="#stack">Stack</a>
+  <a href="#process">Process</a>
+  <a href="#contact">Contact</a>
+  <a href="#contact" class="btn btn-primary">Start a project</a>
+</div>
+
+<main id="top">
+
+  <!-- ============================= HERO ============================= -->
+  <section class="hero wrap">
+    <div class="hero-copy">
+      <span class="eyebrow">full-stack duo — est. 2021</span>
+      <div class="availability-badge" id="availabilityBadge">
+        <span class="dot"></span>
+        <span class="status-text" id="availabilityText">Available for projects</span>
+      </div>
+      <h1>Two developers.<br>One clean <span class="fade">commit</span> history.</h1>
+      <p class="lead">We're a two-person full-stack studio — one shared codebase, shared ownership, and no work lost in handoffs. Five years of building and shipping real products for real clients.</p>
+      <div class="hero-actions">
+        <a href="#work" class="btn btn-primary">See the work</a>
+        <a href="#contact" class="btn btn-ghost">Start a project →</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><b>05+</b><span>years shipping</span></div>
+        <div class="stat"><b>20+</b><span>projects merged</span></div>
+        <div class="stat"><b>02</b><span>devs, zero outsourcing</span></div>
+      </div>
+    </div>
+
+    <div class="hero-graph reveal" id="heroGraph">
+      <div class="frame">
+        <div class="frame-topbar">
+          <span>graph.log</span>
+          <div class="frame-dots"><span></span><span></span><span></span></div>
+        </div>
+        <svg viewBox="0 0 460 220" width="100%" height="auto">
+          <!-- grey branch: frontend -->
+          <path class="git-line draw" d="M20,55 C160,55 190,110 235,110" />
+          <!-- grey branch: backend (equal weight to frontend) -->
+          <path class="git-line draw draw-delay" d="M20,175 C160,175 190,110 235,110" />
+          <!-- merged trunk: this is the only accented part, since it's the shared result -->
+          <path class="git-line-accent draw" style="animation-delay:.9s" d="M235,110 C300,110 340,110 420,110" />
+
+          <text x="26" y="42" class="git-label">frontend</text>
+          <text x="26" y="196" class="git-label">backend</text>
+          <text x="330" y="96" class="git-label-accent">shipped → prod</text>
+
+          <circle class="git-dot pulse-dot" style="animation-delay:.2s" cx="20" cy="55" r="5"/>
+          <circle class="git-dot pulse-dot" style="animation-delay:.45s" cx="98" cy="55" r="5"/>
+          <circle class="git-dot pulse-dot" style="animation-delay:.2s" cx="20" cy="175" r="5"/>
+          <circle class="git-dot pulse-dot" style="animation-delay:.45s" cx="98" cy="175" r="5"/>
+          <circle class="git-dot pulse-dot" style="animation-delay:1s" cx="235" cy="110" r="6"/>
+          <circle class="git-dot-accent pulse-dot" style="animation-delay:1.3s" cx="330" cy="110" r="5"/>
+          <circle class="git-dot-accent pulse-dot" style="animation-delay:1.55s" cx="420" cy="110" r="6"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================= TICKER ============================= -->
+  <section class="ticker-section">
+    <div class="ticker-track" id="tickerTrack">
+      <span>TypeScript</span><span>React</span><span>Next.js</span><span>Node.js</span><span>PostgreSQL</span><span>GraphQL</span><span>Docker</span><span>AWS</span><span>Tailwind CSS</span><span>Redis</span><span>Python</span><span>MongoDB</span>
+    </div>
+  </section>
+
+  <!-- ============================= STACK ============================= -->
+  <section class="section-pad" id="stack">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">what we build</span>
+        <h2>One team, the whole stack.</h2>
+        <p>No handing your project between agencies. We scope, design, build, and deploy it — together, end to end.</p>
+      </div>
+
+      <div class="stack-grid reveal-stagger">
+        <div class="stack-card reveal" style="--i:0">
+          <span class="num">01</span>
+          <h3>Frontend Engineering</h3>
+          <p>Fast, accessible interfaces built in React and Next.js — pixel-accurate, responsive, and tested across devices.</p>
+          <div class="chips"><span class="tag">React</span><span class="tag">Next.js</span><span class="tag">Tailwind</span></div>
+        </div>
+        <div class="stack-card reveal" style="--i:1">
+          <span class="num">02</span>
+          <h3>Backend &amp; APIs</h3>
+          <p>Node and Python services, REST and GraphQL APIs, authentication, and databases built to hold up under real traffic.</p>
+          <div class="chips"><span class="tag">Node.js</span><span class="tag">PostgreSQL</span><span class="tag">GraphQL</span></div>
+        </div>
+        <div class="stack-card reveal" style="--i:2">
+          <span class="num">03</span>
+          <h3>Infra &amp; DevOps</h3>
+          <p>CI/CD pipelines, containerized deploys, and monitoring — so shipping updates is routine, not risky.</p>
+          <div class="chips"><span class="tag">Docker</span><span class="tag">AWS</span><span class="tag">CI/CD</span></div>
+        </div>
+        <div class="stack-card reveal" style="--i:3">
+          <span class="num">04</span>
+          <h3>Product Strategy</h3>
+          <p>We scope features with you before writing code, so what gets built is what actually moves your product forward.</p>
+          <div class="chips"><span class="tag">Roadmapping</span><span class="tag">UX</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================= PROCESS ============================= -->
+  <section class="section-pad" id="process">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">how two devs ship one product</span>
+        <h2>Two branches, one release.</h2>
+        <p>We split by layer, not by ego. Every project runs through the same four-step flow before it reaches your users.</p>
+      </div>
+
+      <div class="process reveal">
+        <div class="branch-col you">
+          <span class="branch-tag"><span class="chip"></span>branch: frontend</span>
+          <h4>Dev One</h4>
+          <ul class="branch-steps">
+            <li><span class="n">01</span>Turns the scope into wireframes and a component plan.</li>
+            <li><span class="n">02</span>Builds the interface, states, and interactions.</li>
+            <li><span class="n">03</span>Wires it up to the live API and polishes edge cases.</li>
+          </ul>
+        </div>
+        <div class="branch-col partner">
+          <span class="branch-tag"><span class="chip"></span>branch: backend</span>
+          <h4>Dev Two</h4>
+          <ul class="branch-steps">
+            <li><span class="n">01</span>Designs the data model and API contract.</li>
+            <li><span class="n">02</span>Builds services, auth, and business logic.</li>
+            <li><span class="n">03</span>Handles infra, deploys, and load testing.</li>
+          </ul>
+        </div>
+        <div class="merge-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="6" cy="6" r="2.4"/><circle cx="6" cy="18" r="2.4"/><circle cx="18" cy="12" r="2.4"/><path d="M6 8.4V15.6M8 6.9C11 6.9 15.7 8.5 15.9 10.4M8 17.1c3-.1 7.7-1.7 7.9-3.6"/></svg>
+          merge → we review each other's code, then ship together. No blind spots, no solo bottlenecks.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================= STORY (scroll-driven) ============================= -->
+  <section class="section-pad story-section" id="story">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">from idea to production</span>
+        <h2>Every build, the same journey.</h2>
+        <p>Scroll through the five stages every project passes through — from first commit to live in production.</p>
+      </div>
+    </div>
+
+    <div class="story-grid wrap">
+      <div class="story-steps">
+        <div class="story-step" data-step="0">
+          <span class="story-step-num">01</span>
+          <span class="story-step-tag">scope</span>
+          <h3>We scope the idea</h3>
+          <p>Every build starts with a conversation — goals, users, and constraints — until the plan is airtight.</p>
+        </div>
+        <div class="story-step" data-step="1">
+          <span class="story-step-num">02</span>
+          <span class="story-step-tag">architect</span>
+          <h3>We architect the system</h3>
+          <p>Data models, API contracts, and component structure — mapped out before a single line of code.</p>
+        </div>
+        <div class="story-step" data-step="2">
+          <span class="story-step-num">03</span>
+          <span class="story-step-tag">build</span>
+          <h3>We build in parallel</h3>
+          <p>Frontend and backend move together on one shared branch — no waiting, no handoffs.</p>
+        </div>
+        <div class="story-step" data-step="3">
+          <span class="story-step-num">04</span>
+          <span class="story-step-tag">merge</span>
+          <h3>We merge &amp; test</h3>
+          <p>Every feature gets reviewed, tested, and merged into a single clean release.</p>
+        </div>
+        <div class="story-step" data-step="4">
+          <span class="story-step-num">05</span>
+          <span class="story-step-tag">ship</span>
+          <h3>We ship to production</h3>
+          <p>Deployed, monitored, and handed off — live and ready for real traffic.</p>
+        </div>
+      </div>
+
+      <div class="story-visual-col">
+        <!-- ambient tech icons — fill the empty space above/below the ring -->
+        <div class="tech-float" style="--fx:-190px; --fy:-255px; --fd:0s;" title="Java">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 17.5c-1.6 1 2.6 2.1 6.8 1.4M9.3 14.6c-2.6 1.5 3 2.6 7.7 1.5M13 3s-4 2.4-1.4 5.4c2.3 2.7-.6 4.1-.6 4.1M8.6 20.7c-2 .9 3.3 1.8 8 1"/><path d="M17.5 15.2c1.2.8-.3 2.4-.3 2.4M18.4 12.2c1.6 1.3-.7 3.3-.7 3.3"/></svg>
+        </div>
+        <div class="tech-float" style="--fx:-65px; --fy:-300px; --fd:.4s;" title="React">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><ellipse cx="12" cy="12" rx="10" ry="4.1"/><ellipse cx="12" cy="12" rx="10" ry="4.1" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4.1" transform="rotate(120 12 12)"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg>
+        </div>
+        <div class="tech-float" style="--fx:65px; --fy:-300px; --fd:.8s;" title="C++">C++</div>
+        <div class="tech-float" style="--fx:190px; --fy:-255px; --fd:1.2s; font-size:10.5px;" title="HTML">HTML</div>
+        <div class="tech-float" style="--fx:-190px; --fy:255px; --fd:1.6s;" title="Python">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c-1.7 0-3 .5-3 2v2h6v1H6.5C5 7 4 8.2 4 10.5S5 14 6.5 14H9v-2c0-1.5 1-2.5 2.5-2.5h3c1.4 0 2.5-1 2.5-2.5V4c0-1.5-1.3-2-5-2Z"/><path d="M12 22c1.7 0 3-.5 3-2v-2H9v-1h8.5c1.5 0 2.5-1.2 2.5-3.5S19 9 17.5 9H15v2c0 1.5-1 2.5-2.5 2.5h-3c-1.4 0-2.5 1-2.5 2.5v2c0 1.5 1.3 2 5 2Z"/><circle cx="9" cy="4.3" r=".4" fill="currentColor"/><circle cx="15" cy="19.7" r=".4" fill="currentColor"/></svg>
+        </div>
+        <div class="tech-float" style="--fx:-65px; --fy:300px; --fd:2s;" title="Node.js">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 6.5v11L12 22l8-4.5v-11L12 2Z"/><path d="M8.5 10c1 3 5.8 3 6.8 0"/></svg>
+        </div>
+        <div class="tech-float" style="--fx:65px; --fy:300px; --fd:.3s;" title="Git">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="6" cy="6" r="2.2"/><circle cx="6" cy="18" r="2.2"/><circle cx="17" cy="12" r="2.2"/><path d="M6 8.2V15.8M8.2 6.8C12 6.8 14.8 9 14.8 10.5M8.2 17c3.5-.2 6.6-2.3 6.6-4.5"/></svg>
+        </div>
+        <div class="tech-float" style="--fx:190px; --fy:255px; --fd:.7s;" title="TypeScript">TS</div>
+
+        <div class="story-visual" id="storyVisual">
+          <div class="story-glow"></div>
+          <svg class="story-rings" viewBox="0 0 320 320">
+            <circle class="ring ring-1" cx="160" cy="160" r="55"/>
+            <circle class="ring ring-2" cx="160" cy="160" r="95"/>
+            <circle class="ring ring-3" cx="160" cy="160" r="130"/>
+            <circle class="progress-ring" id="progressRing" cx="160" cy="160" r="130"/>
+          </svg>
+
+          <div class="story-center">
+            <span class="story-count" id="storyCount">01</span>
+            <span class="story-total">/ 05</span>
+          </div>
+
+          <!-- scope: compass -->
+          <div class="story-node" data-step="0" style="--nx:0px; --ny:-130px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/><circle cx="12" cy="12" r="4.5"/></svg>
+          </div>
+          <!-- architect: schema/db -->
+          <div class="story-node" data-step="1" style="--nx:124px; --ny:-40px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><ellipse cx="12" cy="6" rx="7" ry="2.6"/><path d="M5 6v6c0 1.4 3.1 2.6 7 2.6s7-1.2 7-2.6V6"/><path d="M5 12v6c0 1.4 3.1 2.6 7 2.6s7-1.2 7-2.6v-6"/></svg>
+          </div>
+          <!-- build: code brackets -->
+          <div class="story-node" data-step="2" style="--nx:76px; --ny:105px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8 6-5 6 5 6M16 6l5 6-5 6M13.5 4l-3 16"/></svg>
+          </div>
+          <!-- merge: git-merge -->
+          <div class="story-node" data-step="3" style="--nx:-76px; --ny:105px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="6" cy="6" r="2.4"/><circle cx="6" cy="18" r="2.4"/><circle cx="18" cy="12" r="2.4"/><path d="M6 8.4V15.6M8 6.9C11 6.9 15.7 8.5 15.9 10.4M8 17.1c3-.1 7.7-1.7 7.9-3.6"/></svg>
+          </div>
+          <!-- ship: rocket -->
+          <div class="story-node" data-step="4" style="--nx:-124px; --ny:-40px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c2.5 2 4 5.3 4 8.5 0 2-1 4-1 4l-3 1.5-3-1.5s-1-2-1-4C8 7.3 9.5 4 12 2Z"/><path d="M9 15l-2 5 3.5-2M15 15l2 5-3.5-2"/><circle cx="12" cy="9.5" r="1.6"/></svg>
+          </div>
+
+          <div class="frame-topbar story-topbar">
+            <span>build.log</span>
+            <div class="frame-dots"><span></span><span></span><span></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================= PROJECTS ============================= -->
+  <section class="section-pad" id="work">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">selected work</span>
+        <h2>Things we've shipped.</h2>
+        <p>A few projects we've built end to end. Click through to see them live.</p>
+      </div>
+
+      <div class="projects-grid" id="projectsGrid"></div>
+    </div>
+  </section>
+
+  <!-- ============================= DISCORD PROJECTS ============================= -->
+  <section class="section-pad" id="discord">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">discord engineering</span>
+        <h2>Bots built for real volume.</h2>
+        <p>Beyond web apps — we design and ship Discord bots for commerce and community management, built to hold up at scale.</p>
+      </div>
+
+      <div class="discord-grid">
+        <div class="discord-card reveal">
+          <div class="discord-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 9.5c0 .8-.7 1.5-1.5 1.5s-1.5-.7-1.5-1.5.7-1.5 1.5-1.5 1.5.7 1.5 1.5ZM18.5 9.5c0 .8-.7 1.5-1.5 1.5s-1.5-.7-1.5-1.5.7-1.5 1.5-1.5 1.5.7 1.5 1.5Z"/><path d="M6.5 5.5C9 4.3 15 4.3 17.5 5.5c2 3 2.3 8 1.5 11-1.8 1.6-3.6 2.2-5.3 2.4l-.9-1.6M6.5 5.5C4.5 8.5 4.2 13.5 5 16.5c1.8 1.6 3.6 2.2 5.3 2.4l.9-1.6"/><path d="M9 15.5c2 .8 4 .8 6 0"/></svg>
+          </div>
+          <h3>Slik.lol Bot</h3>
+          <div class="discord-stats">
+            <div class="stat"><b>$10K+</b><span>in processed transactions</span></div>
+          </div>
+          <p>Built the core transaction bot powering Slik.lol's storefront — handling automated order flow, delivery, and payments with over $10,000 USD in successfully completed transactions to date.</p>
+          <div class="p-tags"><span class="tag">Discord.js</span><span class="tag">Payments</span><span class="tag">Automation</span></div>
+        </div>
+
+        <div class="discord-card reveal" style="--i:1">
+          <div class="discord-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 20v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M22 20v-2a4 4 0 0 0-3-3.87M15.5 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <h3>Community Support Bots</h3>
+          <div class="discord-stats">
+            <div class="stat"><b>25+</b><span>support bots deployed</span></div>
+            <div class="stat"><b>1M+</b><span>combined community reach</span></div>
+          </div>
+          <p>Designed and deployed 25+ custom support bots for Discord communities, spanning a combined network of over 1 million members — ticketing, moderation, and automated support flows built for scale.</p>
+          <div class="p-tags"><span class="tag">Discord.js</span><span class="tag">Moderation</span><span class="tag">Support tooling</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================= CONTACT ============================= -->
+  <section class="section-pad" id="contact">
+    <div class="wrap">
+      <div class="contact-panel reveal">
+        <span class="eyebrow">let's talk</span>
+        <h2>Got a project worth merging into?</h2>
+        <p>Tell us what you're building. We'll reply with next steps — usually within a day.</p>
+        <div class="contact-actions">
+          <button type="button" class="btn btn-primary" onclick="openContactModal('email')">Email us</button>
+          <button type="button" class="btn btn-ghost" onclick="openContactModal('call')">Book a call</button>
+        </div>
+        <div class="icon-links">
+          <a href="https://github.com/veileds" aria-label="GitHub" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12a11.5 11.5 0 0 0 7.86 10.93c.58.1.79-.25.79-.56v-2.02c-3.2.7-3.87-1.36-3.87-1.36-.53-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.68 0-1.25.45-2.28 1.18-3.08-.12-.29-.51-1.46.11-3.04 0 0 .96-.31 3.15 1.18a10.9 10.9 0 0 1 5.74 0c2.19-1.49 3.15-1.18 3.15-1.18.62 1.58.23 2.75.11 3.04.74.8 1.18 1.83 1.18 3.08 0 4.41-2.7 5.38-5.27 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg>
+          </a>
+          <a href="https://instagram.com/veileds.xyz" aria-label="Instagram" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="2.5" width="19" height="19" rx="5"/><circle cx="12" cy="12" r="4.3"/><circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-top">
+      <a href="#top" class="footer-logo">
+        <span class="mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#5fcf8e" stroke-width="2" stroke-linecap="round"><circle cx="6" cy="6" r="2.4"/><circle cx="6" cy="18" r="2.4"/><circle cx="18" cy="12" r="2.4"/><path d="M6 8.4V15.6M8 6.9C11 6.9 15.7 8.5 15.9 10.4M8 17.1c3-.1 7.7-1.7 7.9-3.6"/></svg>
+        </span>
+        veileds<span class="amp">.xyz</span>
+      </a>
+      <ul class="footer-nav">
+        <li><a href="#work">Work</a></li>
+        <li><a href="#discord">Discord</a></li>
+        <li><a href="#stack">Stack</a></li>
+        <li><a href="#process">Process</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+      <div class="footer-social">
+        <a href="https://github.com/veileds" aria-label="GitHub" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12a11.5 11.5 0 0 0 7.86 10.93c.58.1.79-.25.79-.56v-2.02c-3.2.7-3.87-1.36-3.87-1.36-.53-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.68 0-1.25.45-2.28 1.18-3.08-.12-.29-.51-1.46.11-3.04 0 0 .96-.31 3.15 1.18a10.9 10.9 0 0 1 5.74 0c2.19-1.49 3.15-1.18 3.15-1.18.62 1.58.23 2.75.11 3.04.74.8 1.18 1.83 1.18 3.08 0 4.41-2.7 5.38-5.27 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg>
+        </a>
+        <a href="https://instagram.com/veileds.xyz" aria-label="Instagram" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="2.5" width="19" height="19" rx="5"/><circle cx="12" cy="12" r="4.3"/><circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none"/></svg>
+        </a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> veileds.xyz — built by two people who share one repo.</span>
+      <a href="mailto:veileds.xyz@gmail.com">veileds.xyz@gmail.com</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ============================= CONTACT MODAL ============================= -->
+<div class="modal-overlay" id="contactModalOverlay" aria-hidden="true">
+  <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="contactModalTitle">
+    <button type="button" class="close-modal" id="closeContactModal" aria-label="Close form">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+
+    <div class="modal-head">
+      <span class="eyebrow" id="contactModalEyebrow">let's talk</span>
+      <h3 id="contactModalTitle">Tell us about your project</h3>
+      <p id="contactModalSub">Fill this in and we'll get back to you within a day.</p>
+    </div>
+
+    <form id="contactForm" novalidate>
+      <div class="form-row">
+        <label for="cf-name">Name</label>
+        <input type="text" id="cf-name" name="name" placeholder="Your full name" required>
+      </div>
+      <div class="form-row-split">
+        <div class="form-row">
+          <label for="cf-phone">Contact number</label>
+          <input type="tel" id="cf-phone" name="phone" placeholder="+1 234 567 8900" required>
+        </div>
+        <div class="form-row">
+          <label for="cf-company">Company name</label>
+          <input type="text" id="cf-company" name="company" placeholder="Company / project name">
+        </div>
+      </div>
+      <div class="form-row-split">
+        <div class="form-row">
+          <label for="cf-type">Inquiry type</label>
+          <select id="cf-type" name="type" required>
+            <option value="" disabled selected>Select one</option>
+            <option value="Web development">Web development</option>
+            <option value="Discord bot / automation">Discord bot / automation</option>
+            <option value="E-commerce">E-commerce</option>
+            <option value="Ongoing / retainer work">Ongoing / retainer work</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label for="cf-region">Region</label>
+          <input type="text" id="cf-region" name="region" placeholder="e.g. US, EU, UK, APAC" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <label for="cf-message">A bit about your project <span class="optional">(optional)</span></label>
+        <textarea id="cf-message" name="message" rows="3" placeholder="What are you building?"></textarea>
+      </div>
+
+      <input type="hidden" id="cf-mode" name="mode" value="email">
+
+      <button type="submit" class="btn btn-primary form-submit">
+        <span id="contactModalSubmitLabel">Send inquiry</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+      <p class="form-note">This opens your email app with everything pre-filled, addressed to veileds.xyz@gmail.com — nothing is sent from here.</p>
+    </form>
+  </div>
+</div>
+
+<script>
+/* ===================================================================
+   AVAILABILITY STATUS — change CURRENT_STATUS to update the badge
+   on the homepage. Add new statuses to STATUSES if you need more
+   than "available" / "busy" / "limited".
+=================================================================== */
+const CURRENT_STATUS = "available"; // <-- change this: "available" | "busy" | "limited"
+
+const STATUSES = {
+  available: { text: "Available for more projects", color: "#5fcf8e" },
+  limited:   { text: "Limited availability",         color: "#e0b84e" },
+  busy:      { text: "Currently at full capacity",   color: "#e2694e" }
+};
+
+(function applyAvailability(){
+  const cfg = STATUSES[CURRENT_STATUS] || STATUSES.available;
+  const badge = document.getElementById('availabilityBadge');
+  const text = document.getElementById('availabilityText');
+  if (badge && text) {
+    badge.style.setProperty('--status-color', cfg.color);
+    text.textContent = cfg.text;
+  }
+})();
+
+/* ===================================================================
+   EDIT YOUR PROJECTS HERE
+   - title / description / role: text shown on the card
+   - tags: tech used, shown as small pills
+   - url: the live link — set this and the "Visit site" button lights up
+   - accent: a hex color used for the card's top gradient (keep it dark/moody)
+=================================================================== */
+const PROJECTS = [
+  {
+    title: "Slik",
+    role: "Discord automation shop",
+    description: "A storefront for Discord growth and automation tools, built for instant delivery and 24/7 self-serve ordering.",
+    tags: ["Next.js", "Automation", "Discord API"],
+    url: "https://slik.lol",
+    accent: "linear-gradient(145deg, #1a1c2b, #0a0c0b)"
+  },
+  {
+    title: "Mahad's Shop",
+    role: "E-commerce storefront",
+    description: "A fast, no-friction storefront built for direct-to-customer sales — simple browsing, simple checkout.",
+    tags: ["E-commerce", "Next.js"],
+    url: "https://mahad.shop",
+    accent: "linear-gradient(145deg, #1a1f24, #0a0c0b)"
+  },
+  {
+    title: "Veiled",
+    role: "Discord automation tool",
+    description: "An automation product built for Discord communities at scale, focused on speed and reliable delivery.",
+    tags: ["Automation", "Discord API"],
+    url: "https://veiled.gg",
+    accent: "linear-gradient(145deg, #16221c, #0a0c0b)"
+  },
+  {
+    title: "Colorfly",
+    role: "Industrial manufacturing site",
+    description: "A full business site for a shade-card and packaging manufacturer — service pages, past work, and a working quote-request flow.",
+    tags: ["Business site", "Contact forms"],
+    url: "https://colorflypk.com",
+    accent: "linear-gradient(145deg, #1c1f1a, #0a0c0b)"
+  },
+  {
+    title: "GE International LLC",
+    role: "Global trade &amp; logistics site",
+    description: "A multi-division corporate site for a global trading company, with a routed inquiry form and full compliance documentation.",
+    tags: ["Corporate site", "Forms", "Multi-page"],
+    url: "https://geintllc.com",
+    accent: "linear-gradient(145deg, #14201e, #0a0c0b)"
+  }
+];
+
+const grid = document.getElementById('projectsGrid');
+PROJECTS.forEach((p, i) => {
+  const card = document.createElement('div');
+  card.className = 'project-card reveal';
+  card.style.setProperty('--i', i);
+  card.innerHTML = `
+    <div class="project-thumb" style="background:${p.accent}">
+      <div class="thumb-topbar">
+        <span class="thumb-label">${p.role}</span>
+        <div class="thumb-dots"><span></span><span></span><span></span></div>
+      </div>
+      <div class="thumb-title">${p.title}</div>
+    </div>
+    <div class="project-body">
+      <div class="p-tags">${p.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+      <p>${p.description}</p>
+      <div class="project-footer">
+        <span class="project-role">${p.role}</span>
+        <a class="visit-btn" href="${p.url}" target="_blank" rel="noopener">Visit site <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+      </div>
+    </div>
+  `;
+  grid.appendChild(card);
+});
+
+/* open 6th slot — for you to drop your own project into later.
+   Edit or delete this block whenever you're ready to fill it in. */
+const openSlot = document.createElement('div');
+openSlot.className = 'project-card open-slot reveal';
+openSlot.style.setProperty('--i', PROJECTS.length);
+openSlot.innerHTML = `
+  <div class="open-slot-inner">
+    <div class="open-slot-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+    </div>
+    <h3>One more slot, saved</h3>
+    <p>Reserved just for you — this could be your project. Contact us now to lock it in.</p>
+    <a href="#contact" class="btn btn-primary btn-sm">Contact us →</a>
+  </div>
+`;
+grid.appendChild(openSlot);
+
+/* ===================================================================
+   CONTACT MODAL — Email us / Book a call open the same form. On
+   submit, we build a mailto: link from the fields so the message
+   still lands in veileds.xyz@gmail.com (no backend needed).
+=================================================================== */
+(function initContactModal(){
+  const overlay = document.getElementById('contactModalOverlay');
+  const panel = overlay.querySelector('.modal-panel');
+  const closeBtn = document.getElementById('closeContactModal');
+  const form = document.getElementById('contactForm');
+  const modeInput = document.getElementById('cf-mode');
+  const eyebrow = document.getElementById('contactModalEyebrow');
+  const title = document.getElementById('contactModalTitle');
+  const sub = document.getElementById('contactModalSub');
+  const submitLabel = document.getElementById('contactModalSubmitLabel');
+  let lastFocused = null;
+
+  const COPY = {
+    email: {
+      eyebrow: "let's talk",
+      title: "Tell us about your project",
+      sub: "Fill this in and we'll get back to you within a day.",
+      submit: "Send inquiry"
+    },
+    call: {
+      eyebrow: "book a call",
+      title: "Let's set up a call",
+      sub: "Share a few details and we'll follow up to find a time.",
+      submit: "Request a call"
+    }
+  };
+
+  window.openContactModal = function(mode){
+    mode = mode === 'call' ? 'call' : 'email';
+    modeInput.value = mode;
+    const c = COPY[mode];
+    eyebrow.textContent = c.eyebrow;
+    title.textContent = c.title;
+    sub.textContent = c.sub;
+    submitLabel.textContent = c.submit;
+    lastFocused = document.activeElement;
+    overlay.classList.add('open');
+    overlay.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => document.getElementById('cf-name').focus(), 250);
+  };
+
+  function closeModal(){
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    if (lastFocused) lastFocused.focus();
+  }
+
+  closeBtn.addEventListener('click', closeModal);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && overlay.classList.contains('open')) closeModal(); });
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (!form.checkValidity()) { form.reportValidity(); return; }
+
+    const mode = modeInput.value;
+    const data = {
+      name: document.getElementById('cf-name').value.trim(),
+      phone: document.getElementById('cf-phone').value.trim(),
+      company: document.getElementById('cf-company').value.trim() || '—',
+      type: document.getElementById('cf-type').value,
+      region: document.getElementById('cf-region').value.trim(),
+      message: document.getElementById('cf-message').value.trim() || '—'
+    };
+
+    const subject = mode === 'call'
+      ? `Let's book a call — ${data.name}`
+      : `New project inquiry — ${data.name}`;
+
+    const bodyLines = [
+      `Name: ${data.name}`,
+      `Contact number: ${data.phone}`,
+      `Company: ${data.company}`,
+      `Inquiry type: ${data.type}`,
+      `Region: ${data.region}`,
+      '',
+      `Message: ${data.message}`
+    ];
+
+    const mailto = `mailto:veileds.xyz@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyLines.join('\n'))}`;
+    window.location.href = mailto;
+    closeModal();
+    form.reset();
+  });
+})();
+
+/* header scroll state */
+const header = document.getElementById('site-header');
+window.addEventListener('scroll', () => {
+  header.classList.toggle('scrolled', window.scrollY > 20);
+}, { passive: true });
+
+/* mobile menu */
+const navToggle = document.getElementById('navToggle');
+const mobileMenu = document.getElementById('mobileMenu');
+navToggle.addEventListener('click', () => mobileMenu.classList.toggle('open'));
+mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => mobileMenu.classList.remove('open')));
+
+/* scroll reveal */
+const revealEls = document.querySelectorAll('.reveal');
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('in');
+      io.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.15 });
+revealEls.forEach(el => io.observe(el));
+
+/* seamless ticker duplication */
+const track = document.getElementById('tickerTrack');
+track.innerHTML += track.innerHTML;
+
+/* footer year */
+document.getElementById('year').textContent = new Date().getFullYear();
+
+/* ===================================================================
+   SCROLL STORY — "from idea to production" section. As each step
+   scrolls through the vertical center of the viewport, it becomes
+   active: the matching orbit node lights up and the progress ring
+   fills to that step's position.
+=================================================================== */
+(function initStory(){
+  const storySteps = document.querySelectorAll('.story-step');
+  const storyNodes = document.querySelectorAll('.story-node');
+  const storyCount = document.getElementById('storyCount');
+  const progressRing = document.getElementById('progressRing');
+  if (!storySteps.length || !progressRing) return;
+
+  const RING_RADIUS = 130;
+  const RING_CIRC = 2 * Math.PI * RING_RADIUS;
+  progressRing.style.strokeDasharray = String(RING_CIRC);
+  progressRing.style.strokeDashoffset = String(RING_CIRC);
+
+  function setStoryStep(idx) {
+    storySteps.forEach(s => s.classList.toggle('active', Number(s.dataset.step) === idx));
+    storyNodes.forEach(n => n.classList.toggle('active', Number(n.dataset.step) === idx));
+    if (storyCount) storyCount.textContent = String(idx + 1).padStart(2, '0');
+    const frac = idx / (storySteps.length - 1);
+    progressRing.style.strokeDashoffset = String(RING_CIRC * (1 - frac));
+  }
+
+  const storyObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) setStoryStep(Number(entry.target.dataset.step));
+    });
+  }, { rootMargin: '-45% 0px -45% 0px', threshold: 0 });
+
+  storySteps.forEach(s => storyObserver.observe(s));
+  setStoryStep(0);
+})();
+
+/* ===================================================================
+   3D TILT EFFECTS — subtle perspective tilt on hover for cards and
+   the hero graph, skipped entirely for touch devices / reduced motion.
+=================================================================== */
+const canTilt = window.matchMedia('(hover: hover) and (pointer: fine)').matches
+  && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+if (canTilt) {
+  function addTilt(el, { max = 9, lift = -6, scale = 1 } = {}) {
+    el.addEventListener('mousemove', (e) => {
+      const r = el.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width;
+      const py = (e.clientY - r.top) / r.height;
+      const rx = (0.5 - py) * max;
+      const ry = (px - 0.5) * max;
+      el.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(${lift}px) scale(${scale})`;
+    });
+    el.addEventListener('mouseleave', () => { el.style.transform = ''; });
+  }
+
+  document.querySelectorAll('.project-card:not(.open-slot)').forEach(el => addTilt(el, { max: 8, lift: -6 }));
+  document.querySelectorAll('.discord-card').forEach(el => addTilt(el, { max: 7, lift: -4 }));
+  document.querySelectorAll('.stack-card').forEach(el => addTilt(el, { max: 6, lift: -3, scale: 1.02 }));
+
+  const storyVisual = document.getElementById('storyVisual');
+  if (storyVisual) addTilt(storyVisual, { max: 10, lift: 0 });
+
+  const heroFrame = document.querySelector('.hero-graph .frame');
+  const heroGraphWrap = document.getElementById('heroGraph');
+  if (heroFrame && heroGraphWrap) {
+    heroGraphWrap.addEventListener('mousemove', (e) => {
+      const r = heroGraphWrap.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width;
+      const py = (e.clientY - r.top) / r.height;
+      const rx = (0.5 - py) * 10;
+      const ry = (px - 0.5) * 10;
+      heroFrame.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+    });
+    heroGraphWrap.addEventListener('mouseleave', () => {
+      heroFrame.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg)';
+    });
+  }
+}
+</script>
+
+</body>
+</html>
