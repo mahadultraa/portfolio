@@ -1152,9 +1152,236 @@ footer{
 .divider-label::after{
   content:"";flex:1;height:1px;background:var(--border-soft);
 }
+
+/* ============================= NETWORK DOTS CANVAS ============================= */
+#netCanvas{
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:0;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity 1s ease;
+}
+#netCanvas.visible{
+  opacity:1;
+}
+
+/* ============================= LOADING SCREEN ============================= */
+#loader{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  background:#0a0c0b;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:28px;
+  transition:opacity .8s ease, visibility .8s ease;
+}
+#loader.hide{
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+}
+.loader-text{
+  font-family:'JetBrains Mono', monospace;
+  font-size:clamp(20px, 3.5vw, 34px);
+  font-weight:600;
+  letter-spacing:0.22em;
+  color:#5fcf8e;
+  text-transform:uppercase;
+  text-shadow:0 0 18px rgba(95,207,142,0.55), 0 0 40px rgba(95,207,142,0.25);
+  line-height:1;
+  min-height:1.2em;
+}
+.loader-sub{
+  font-family:'JetBrains Mono', monospace;
+  font-size:clamp(10px, 1.4vw, 13px);
+  letter-spacing:0.3em;
+  color:#2c5940;
+  text-transform:uppercase;
+  margin-top:-10px;
+}
+.loader-bar-wrap{
+  width:min(420px, 80vw);
+  height:2px;
+  background:rgba(95,207,142,0.12);
+  border-radius:2px;
+  overflow:hidden;
+  position:relative;
+}
+.loader-bar{
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg, #2c5940, #5fcf8e);
+  border-radius:2px;
+  transition:width 0.06s linear;
+  box-shadow:0 0 10px rgba(95,207,142,0.6);
+}
+.loader-pct{
+  font-family:'JetBrains Mono', monospace;
+  font-size:11px;
+  letter-spacing:0.1em;
+  color:#2c5940;
+  margin-top:6px;
+}
+#loaderContinue{
+  opacity:0;
+  pointer-events:none;
+  transform:translateY(10px);
+  transition:opacity .5s ease, transform .5s ease;
+  font-family:'JetBrains Mono', monospace;
+  font-size:13px;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  color:#0a0c0b;
+  background:#5fcf8e;
+  border:none;
+  padding:13px 36px;
+  border-radius:8px;
+  cursor:pointer;
+  box-shadow:0 0 24px rgba(95,207,142,0.35);
+}
+#loaderContinue.visible{
+  opacity:1;
+  pointer-events:auto;
+  transform:translateY(0);
+}
+#loaderContinue:hover{
+  background:#8fe3b8;
+  box-shadow:0 0 36px rgba(95,207,142,0.55);
+}
+
+/* ============================= WELCOME OVERLAY ============================= */
+#welcomeOverlay{
+  position:fixed;
+  inset:0;
+  z-index:8000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(10,12,11,0.55);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  opacity:0;
+  visibility:hidden;
+  transition:opacity .6s ease, visibility .6s ease;
+}
+#welcomeOverlay.show{
+  opacity:1;
+  visibility:visible;
+}
+#welcomeOverlay.hide{
+  opacity:0;
+  visibility:hidden;
+}
+.welcome-text{
+  font-family:'Space Grotesk', sans-serif;
+  font-size:clamp(28px, 5vw, 64px);
+  font-weight:600;
+  letter-spacing:-0.02em;
+  color:#eceeeb;
+  text-align:center;
+  line-height:1.1;
+  opacity:0;
+  transform:translateY(20px) scale(0.96);
+  transition:opacity .7s cubic-bezier(.16,.84,.44,1), transform .7s cubic-bezier(.16,.84,.44,1);
+}
+.welcome-text .accent{
+  color:#5fcf8e;
+}
+#welcomeOverlay.show .welcome-text{
+  opacity:1;
+  transform:translateY(0) scale(1);
+}
+
+/* ============================= MUSIC BUTTON ============================= */
+#musicBtn{
+  position:fixed;
+  bottom:24px;
+  right:24px;
+  z-index:500;
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  border:1px solid var(--border);
+  background:rgba(10,12,11,0.88);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  color:var(--text-muted);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:border-color .25s ease, color .25s ease, transform .25s ease, box-shadow .25s ease;
+  opacity:0;
+  pointer-events:none;
+  transform:scale(0.8);
+}
+#musicBtn.visible{
+  opacity:1;
+  pointer-events:auto;
+  transform:scale(1);
+}
+#musicBtn:hover{
+  border-color:var(--green-dim);
+  color:var(--green-soft);
+  box-shadow:0 0 18px rgba(95,207,142,0.25);
+}
+#musicBtn svg{width:18px;height:18px;flex-shrink:0;}
+#musicBtn .icon-mute{display:none;}
+#musicBtn.muted .icon-play{display:none;}
+#musicBtn.muted .icon-mute{display:block;}
 </style>
 </head>
 <body>
+
+<!-- ============================= LOADING SCREEN ============================= -->
+<div id="loader">
+  <div class="loader-text" id="loaderText">&nbsp;</div>
+  <div class="loader-sub">veileds.xyz</div>
+  <div style="display:flex;flex-direction:column;align-items:center;gap:8px;width:min(420px,80vw);">
+    <div class="loader-bar-wrap">
+      <div class="loader-bar" id="loaderBar"></div>
+    </div>
+    <div class="loader-pct" id="loaderPct">0%</div>
+  </div>
+  <button id="loaderContinue">Continue</button>
+</div>
+
+<!-- ============================= WELCOME OVERLAY ============================= -->
+<div id="welcomeOverlay">
+  <div class="welcome-text">welcome to<br>our <span class="accent">world</span></div>
+</div>
+
+<!-- ============================= NETWORK DOTS CANVAS ============================= -->
+<canvas id="netCanvas"></canvas>
+
+<!-- ============================= BACKGROUND MUSIC ============================= -->
+<!-- To add music: set the src attribute of the audio element to your music file path -->
+<!-- Example: <source src="music.mp3" type="audio/mpeg"> -->
+<audio id="bgMusic" loop>
+  <source src="attached_assets/portfolio_bg_1785778298008.mp3" type="audio/mpeg">
+</audio>
+
+<!-- Music mute/unmute button -->
+<button id="musicBtn" aria-label="Toggle music">
+  <!-- Play/unmute icon -->
+  <svg class="icon-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9 18V5l12-2v13"/>
+    <circle cx="6" cy="18" r="3"/>
+    <circle cx="18" cy="16" r="3"/>
+  </svg>
+  <!-- Mute icon -->
+  <svg class="icon-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9 18V5l12-2v13"/>
+    <circle cx="6" cy="18" r="3"/>
+    <circle cx="18" cy="16" r="3"/>
+    <line x1="2" y1="2" x2="22" y2="22"/>
+  </svg>
+</button>
 
 <header id="site-header">
   <div class="wrap">
@@ -1604,12 +1831,214 @@ footer{
 </div>
 
 <script>
-/* ===================================================================
-   AVAILABILITY STATUS — change CURRENT_STATUS to update the badge
-   on the homepage. Add new statuses to STATUSES if you need more
-   than "available" / "busy" / "limited".
-=================================================================== */
-const CURRENT_STATUS = "available"; // <-- change this: "available" | "busy" | "limited"
+/* =================================================================
+   LOADING SCREEN — scrambled character reveal + progress bar
+================================================================= */
+(function initLoader(){
+  const TARGET   = 'LOADING YOUR EXPERIENCE';
+  const CHARS    = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*[]{}|<>';
+  const DURATION = 2600; // total ms for progress bar
+  const loaderEl  = document.getElementById('loader');
+  const textEl    = document.getElementById('loaderText');
+  const barEl     = document.getElementById('loaderBar');
+  const pctEl     = document.getElementById('loaderPct');
+  const continueBtn = document.getElementById('loaderContinue');
+  const welcomeEl = document.getElementById('welcomeOverlay');
+
+  // Progress bar
+  const startTime = performance.now();
+  let pctDone = 0;
+
+  function animBar(now){
+    const elapsed = now - startTime;
+    pctDone = Math.min(100, Math.round((elapsed / DURATION) * 100));
+    barEl.style.width = pctDone + '%';
+    pctEl.textContent = pctDone + '%';
+    if (pctDone < 100) requestAnimationFrame(animBar);
+  }
+  requestAnimationFrame(animBar);
+
+  // Scramble text
+  const charCount = TARGET.length;
+  const resolveStart  = 400;
+  const resolveSpread = DURATION - resolveStart - 300;
+
+  let frame    = [];
+  for (let i = 0; i < charCount; i++){
+    frame.push(TARGET[i] === ' ' ? ' ' : CHARS[Math.floor(Math.random() * CHARS.length)]);
+  }
+
+  // Pre-mark spaces as already resolved so every(Boolean) can fire
+  let resolved     = TARGET.split('').map(c => c === ' ');
+  let scrambleStart = null;
+
+  function scrambleFrame(now){
+    if (!scrambleStart) scrambleStart = now;
+    const elapsed = now - scrambleStart;
+
+    for (let i = 0; i < charCount; i++){
+      if (TARGET[i] === ' '){ frame[i] = ' '; continue; }
+      const resolveAt = resolveStart + (i / (charCount - 1)) * resolveSpread;
+      if (elapsed >= resolveAt){
+        resolved[i] = true;
+        frame[i] = TARGET[i];
+      } else {
+        frame[i] = CHARS[Math.floor(Math.random() * CHARS.length)];
+      }
+    }
+
+    textEl.textContent = frame.join('');
+
+    if (resolved.every(Boolean)){
+      // All resolved — show Continue button
+      setTimeout(() => continueBtn.classList.add('visible'), 300);
+    } else {
+      requestAnimationFrame(scrambleFrame);
+    }
+  }
+
+  requestAnimationFrame(scrambleFrame);
+
+  // Continue button → welcome screen → main site
+  continueBtn.addEventListener('click', () => {
+    continueBtn.classList.remove('visible');
+
+    // 1. Hide loader
+    loaderEl.classList.add('hide');
+
+    // 2. Reveal canvas background
+    document.getElementById('netCanvas').classList.add('visible');
+
+    // 3. Show welcome overlay (blurs everything behind it via backdrop-filter)
+    welcomeEl.classList.add('show');
+
+    // 4. Start music
+    const music = document.getElementById('bgMusic');
+    const src = music.querySelector('source');
+    if (src && src.getAttribute('src')) {
+      music.volume = 0.35;
+      music.play().catch(() => {});
+    }
+
+    // 5. After 3 s, fade out welcome overlay and show music button
+    setTimeout(() => {
+      welcomeEl.classList.remove('show');
+      welcomeEl.classList.add('hide');
+      setTimeout(() => {
+        welcomeEl.style.display = 'none';
+        document.getElementById('musicBtn').classList.add('visible');
+      }, 600);
+    }, 3000);
+  });
+})();
+
+/* =================================================================
+   NETWORK DOTS BACKGROUND — canvas particle network
+================================================================= */
+(function initNetCanvas(){
+  const canvas = document.getElementById('netCanvas');
+  const ctx    = canvas.getContext('2d');
+
+  const DOT_COUNT   = 80;
+  const MAX_DIST    = 160;
+  const DOT_RADIUS  = 1.5;
+  const DOT_COLOR   = 'rgba(95,207,142,';   // green accent
+  const LINE_COLOR  = 'rgba(95,207,142,';
+
+  let W, H, dots;
+
+  function resize(){
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function makeDot(){
+    return {
+      x: Math.random() * W,
+      y: Math.random() * H,
+      vx: (Math.random() - 0.5) * 0.5,
+      vy: (Math.random() - 0.5) * 0.5,
+    };
+  }
+
+  function init(){
+    resize();
+    dots = Array.from({ length: DOT_COUNT }, makeDot);
+  }
+
+  function draw(){
+    ctx.clearRect(0, 0, W, H);
+
+    // Update positions
+    for (const d of dots){
+      d.x += d.vx;
+      d.y += d.vy;
+      if (d.x < 0 || d.x > W) d.vx *= -1;
+      if (d.y < 0 || d.y > H) d.vy *= -1;
+    }
+
+    // Draw lines between close dots
+    for (let i = 0; i < dots.length; i++){
+      for (let j = i + 1; j < dots.length; j++){
+        const dx = dots[i].x - dots[j].x;
+        const dy = dots[i].y - dots[j].y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < MAX_DIST){
+          const alpha = (1 - dist / MAX_DIST) * 0.18;
+          ctx.beginPath();
+          ctx.strokeStyle = LINE_COLOR + alpha + ')';
+          ctx.lineWidth = 0.8;
+          ctx.moveTo(dots[i].x, dots[i].y);
+          ctx.lineTo(dots[j].x, dots[j].y);
+          ctx.stroke();
+        }
+      }
+    }
+
+    // Draw dots
+    for (const d of dots){
+      ctx.beginPath();
+      ctx.fillStyle = DOT_COLOR + '0.45)';
+      ctx.arc(d.x, d.y, DOT_RADIUS, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', () => {
+    resize();
+  });
+
+  init();
+  draw();
+})();
+
+/* =================================================================
+   MUSIC — mute / unmute button
+================================================================= */
+(function initMusic(){
+  const btn   = document.getElementById('musicBtn');
+  const audio = document.getElementById('bgMusic');
+
+  btn.addEventListener('click', () => {
+    if (audio.paused && audio.querySelector
+        && audio.querySelector('source')
+        && audio.querySelector('source').getAttribute('src')) {
+      audio.volume = 0.35;
+      audio.play().catch(() => {});
+      btn.classList.remove('muted');
+    } else if (!audio.paused) {
+      audio.pause();
+      btn.classList.add('muted');
+    }
+  });
+})();
+
+/* =================================================================
+   AVAILABILITY STATUS
+================================================================= */
+const CURRENT_STATUS = "available";
 
 const STATUSES = {
   available: { text: "Available for more projects", color: "#5fcf8e" },
@@ -1627,13 +2056,9 @@ const STATUSES = {
   }
 })();
 
-/* ===================================================================
-   EDIT YOUR PROJECTS HERE
-   - title / description / role: text shown on the card
-   - tags: tech used, shown as small pills
-   - url: the live link — set this and the "Visit site" button lights up
-   - accent: a hex color used for the card's top gradient (keep it dark/moody)
-=================================================================== */
+/* =================================================================
+   PROJECTS
+================================================================= */
 const PROJECTS = [
   {
     title: "Slik",
@@ -1702,8 +2127,6 @@ PROJECTS.forEach((p, i) => {
   grid.appendChild(card);
 });
 
-/* open 6th slot — for you to drop your own project into later.
-   Edit or delete this block whenever you're ready to fill it in. */
 const openSlot = document.createElement('div');
 openSlot.className = 'project-card open-slot reveal';
 openSlot.style.setProperty('--i', PROJECTS.length);
@@ -1719,11 +2142,9 @@ openSlot.innerHTML = `
 `;
 grid.appendChild(openSlot);
 
-/* ===================================================================
-   CONTACT MODAL — Email us / Book a call open the same form. On
-   submit, we build a mailto: link from the fields so the message
-   still lands in veileds.xyz@gmail.com (no backend needed).
-=================================================================== */
+/* =================================================================
+   CONTACT MODAL
+================================================================= */
 (function initContactModal(){
   const overlay = document.getElementById('contactModalOverlay');
   const panel = overlay.querySelector('.modal-panel');
@@ -1843,12 +2264,9 @@ track.innerHTML += track.innerHTML;
 /* footer year */
 document.getElementById('year').textContent = new Date().getFullYear();
 
-/* ===================================================================
-   SCROLL STORY — "from idea to production" section. As each step
-   scrolls through the vertical center of the viewport, it becomes
-   active: the matching orbit node lights up and the progress ring
-   fills to that step's position.
-=================================================================== */
+/* =================================================================
+   SCROLL STORY
+================================================================= */
 (function initStory(){
   const storySteps = document.querySelectorAll('.story-step');
   const storyNodes = document.querySelectorAll('.story-node');
@@ -1879,10 +2297,9 @@ document.getElementById('year').textContent = new Date().getFullYear();
   setStoryStep(0);
 })();
 
-/* ===================================================================
-   3D TILT EFFECTS — subtle perspective tilt on hover for cards and
-   the hero graph, skipped entirely for touch devices / reduced motion.
-=================================================================== */
+/* =================================================================
+   3D TILT EFFECTS
+================================================================= */
 const canTilt = window.matchMedia('(hover: hover) and (pointer: fine)').matches
   && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
