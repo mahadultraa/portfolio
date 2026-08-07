@@ -29,10 +29,28 @@
   --font-body:'Inter', sans-serif;
 
   --container:1160px;
+
+  /* --- gradients + glow --- */
+  --grad-card:linear-gradient(158deg, #161a18 0%, #101413 46%, #0b0e0d 100%);
+  --grad-card-hi:linear-gradient(158deg, #1b201d 0%, #141817 46%, #0d100f 100%);
+  --grad-panel:linear-gradient(150deg, #151917 0%, #0e1211 60%, #0a0c0b 100%);
+  --glow:rgba(95,207,142,0.55);
+  --glow-soft:rgba(95,207,142,0.16);
+  --glow-faint:rgba(95,207,142,0.08);
+  --ease-out:cubic-bezier(.16,.84,.44,1);
+  --ease-spring:cubic-bezier(.34,1.4,.5,1);
+
+  /* responsive gutter — single source of truth */
+  --gutter:32px;
 }
+@media (max-width:1024px){ :root{ --gutter:28px; } }
+@media (max-width:768px){  :root{ --gutter:24px; } }
+@media (max-width:560px){  :root{ --gutter:20px; } }
+@media (max-width:380px){  :root{ --gutter:16px; } }
 
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
+html{ -webkit-text-size-adjust:100%; }
 body{
   background:var(--bg);
   color:var(--text);
@@ -40,6 +58,8 @@ body{
   line-height:1.5;
   overflow-x:hidden;
   -webkit-font-smoothing:antialiased;
+  -webkit-tap-highlight-color:transparent;
+  overflow-wrap:break-word;
 }
 body::before{
   content:"";
@@ -65,7 +85,13 @@ button{font:inherit;}
   input[type="text"], input[type="email"], input[type="tel"], textarea{ cursor:text; }
 }
 
-.wrap{max-width:var(--container);margin:0 auto;padding:0 32px;}
+.wrap{
+  max-width:var(--container);
+  margin:0 auto;
+  padding-left:max(var(--gutter), env(safe-area-inset-left, 0px));
+  padding-right:max(var(--gutter), env(safe-area-inset-right, 0px));
+  width:100%;
+}
 section{position:relative;z-index:1;}
 
 ::selection{background:var(--green-dim);color:var(--green-soft);}
@@ -265,7 +291,6 @@ nav{
 }
 @media (max-width:520px){
   .nav-cta .btn-primary{display:none;}
-  .wrap{padding:0 20px;}
 }
 
 /* ============================= HERO ============================= */
@@ -401,11 +426,13 @@ nav{
   overflow:hidden;
 }
 .stack-card{
-  background:var(--bg);
+  background:var(--grad-card);
   padding:32px 26px;
-  transition:background .3s ease;
+  transition:background .4s ease, box-shadow .4s ease;
+  position:relative;
+  isolation:isolate;
 }
-.stack-card:hover{background:var(--surface);}
+.stack-card:hover{ background:var(--grad-card-hi); }
 .stack-card .num{
   font-family:var(--font-mono);
   font-size:11.5px;
@@ -605,8 +632,8 @@ nav{
 
 .story-node{
   position:absolute;top:50%;left:50%;
-  width:46px;height:46px;
-  transform:translate(calc(-50% + var(--nx)), calc(-50% + var(--ny)));
+  width:calc(46px * var(--ns,1));height:calc(46px * var(--ns,1));
+  transform:translate(calc(-50% + var(--nx) * var(--ns,1)), calc(-50% + var(--ny) * var(--ns,1)));
   border-radius:13px;
   border:1px solid var(--border);
   background:var(--surface);
@@ -614,13 +641,13 @@ nav{
   color:var(--text-dim);
   transition:color .4s ease, border-color .4s ease, background .4s ease, transform .4s cubic-bezier(.16,.84,.44,1), box-shadow .4s ease;
 }
-.story-node svg{width:20px;height:20px;}
+.story-node svg{width:calc(20px * var(--ns,1));height:calc(20px * var(--ns,1));}
 .story-node.active{
   color:var(--green-soft);
   border-color:var(--green-dim);
   background:var(--surface-2);
   box-shadow:0 0 24px -4px rgba(95,207,142,.55);
-  transform:translate(calc(-50% + var(--nx)), calc(-50% + var(--ny))) scale(1.16);
+  transform:translate(calc(-50% + var(--nx) * var(--ns,1)), calc(-50% + var(--ny) * var(--ns,1))) scale(1.16);
 }
 
 .story-topbar{position:absolute;top:-38px;left:0;right:0;font-size:11px;}
@@ -653,10 +680,21 @@ nav{
 @media (max-width:960px){ .tech-float{display:none;} }
 
 @media (max-width:960px){
-  .story-grid{grid-template-columns:1fr;}
+  .story-grid{grid-template-columns:1fr;gap:24px;}
   .story-visual-col{position:static;height:auto;max-height:none;margin-bottom:32px;order:-1;}
-  .story-visual{width:260px;height:260px;margin:0 auto;}
-  .story-step{min-height:auto;padding:18px 4px;}
+  .story-visual{width:260px;height:260px;margin:0 auto;--ns:.8125;}
+  .story-step{
+    min-height:auto;
+    padding:16px 0 16px 18px;   /* was 4px — text was sitting on the border */
+    opacity:.42;
+  }
+  .story-step p{max-width:none;}
+  .story-topbar{display:none;}
+}
+@media (max-width:560px){
+  .story-visual{width:220px;height:220px;--ns:.6875;}
+  .story-count{font-size:27px;}
+  .story-step{padding-left:16px;}
 }
 
 /* ============================= PROJECTS ============================= */
@@ -667,16 +705,19 @@ nav{
 }
 .project-card{
   border:1px solid var(--border);
-  border-radius:14px;
+  border-radius:16px;
   overflow:hidden;
-  background:var(--surface);
-  transition:transform .35s ease, border-color .35s ease, box-shadow .35s ease;
+  background:var(--grad-card);
+  transition:transform .5s var(--ease-out), border-color .4s ease, box-shadow .4s ease;
   display:flex;flex-direction:column;
+  position:relative;
+  isolation:isolate;
 }
 .project-card:hover{
-  transform:translateY(-6px);
   border-color:var(--green-dim);
-  box-shadow:0 20px 40px -20px rgba(0,0,0,0.6);
+  box-shadow:
+    0 26px 50px -26px rgba(0,0,0,0.75),
+    0 0 44px -10px rgba(95,207,142,0.24);
 }
 .project-thumb{
   height:170px;
@@ -686,10 +727,31 @@ nav{
   overflow:hidden;
   border-bottom:1px solid var(--border);
 }
+/* mesh gradient wash over the per-project accent */
 .project-thumb::before{
   content:"";position:absolute;inset:0;
+  background:
+    radial-gradient(70% 90% at 82% 8%, rgba(95,207,142,0.14), transparent 62%),
+    radial-gradient(60% 80% at 10% 100%, rgba(95,207,142,0.06), transparent 60%),
+    linear-gradient(180deg, rgba(255,255,255,0.06), transparent 45%);
   opacity:.9;
+  transition:opacity .5s ease, transform .8s var(--ease-out);
+  z-index:1;
 }
+.project-card:hover .project-thumb::before{ opacity:1; transform:scale(1.06); }
+/* faint grid, so thumbnails read as "screens" rather than blank swatches */
+.project-thumb::after{
+  content:"";position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px);
+  background-size:34px 34px;
+  mask-image:radial-gradient(80% 80% at 50% 40%, #000, transparent 78%);
+  -webkit-mask-image:radial-gradient(80% 80% at 50% 40%, #000, transparent 78%);
+  z-index:1;
+  transition:transform .8s var(--ease-out);
+}
+.project-card:hover .project-thumb::after{ transform:translateY(-6px); }
 .project-thumb .thumb-topbar{
   position:absolute;top:12px;left:16px;right:16px;
   display:flex;justify-content:space-between;align-items:center;
@@ -950,21 +1012,22 @@ footer{
 }
 .discord-card{
   border:1px solid var(--border);
-  border-radius:14px;
-  background:linear-gradient(160deg, var(--surface), var(--bg-soft));
+  border-radius:16px;
+  background:
+    radial-gradient(circle at 85% -10%, rgba(95,207,142,0.13), transparent 55%),
+    radial-gradient(circle at 0% 110%, rgba(95,207,142,0.06), transparent 50%),
+    var(--grad-panel);
   padding:30px 28px;
   position:relative;
   overflow:hidden;
-  transition:border-color .35s ease, box-shadow .35s ease;
-}
-.discord-card::before{
-  content:"";position:absolute;inset:0;
-  background:radial-gradient(circle at 85% -10%, rgba(95,207,142,0.10), transparent 55%);
-  pointer-events:none;
+  isolation:isolate;
+  transition:border-color .4s ease, box-shadow .4s ease, transform .5s var(--ease-out);
 }
 .discord-card:hover{
   border-color:var(--green-dim);
-  box-shadow:0 24px 46px -24px rgba(0,0,0,0.65);
+  box-shadow:
+    0 28px 52px -26px rgba(0,0,0,0.75),
+    0 0 44px -10px rgba(95,207,142,0.22);
 }
 .discord-card-icon{
   width:44px;height:44px;
@@ -1334,6 +1397,781 @@ footer{
 #musicBtn .icon-mute{display:none;}
 #musicBtn.muted .icon-play{display:none;}
 #musicBtn.muted .icon-mute{display:block;}
+
+/* =================================================================
+   ▓▓ ENHANCEMENTS ▓▓
+   Cursor-tracked glow, gradient surfaces, depth, motion, mobile.
+   Everything below is additive — it overrides by source order.
+================================================================= */
+
+/* ---------- anchors clear the fixed header ---------- */
+section[id], main[id]{ scroll-margin-top:96px; }
+
+/* ---------- 1. CURSOR-TRACKED CARD GLOW -------------------------
+   JS writes --mx / --my (in px) on pointermove. Two layers:
+   ::before = soft interior wash, ::after = 1px gradient rim.
+------------------------------------------------------------------ */
+.stack-card, .project-card, .discord-card, .contact-panel{
+  --mx:50%; --my:50%;
+  --spot:420px;
+}
+
+.stack-card::before,
+.project-card::before,
+.discord-card::before,
+.contact-panel::before{
+  content:"";
+  position:absolute; inset:0;
+  border-radius:inherit;
+  background:radial-gradient(var(--spot) circle at var(--mx) var(--my),
+              rgba(95,207,142,0.19), rgba(95,207,142,0.07) 38%, transparent 66%);
+  opacity:0;
+  transition:opacity .45s ease;
+  pointer-events:none;
+  z-index:0;
+}
+
+/* the 1px rim that lights up nearest the cursor */
+.stack-card::after,
+.project-card::after,
+.discord-card::after,
+.contact-panel::after{
+  content:"";
+  position:absolute; inset:0;
+  border-radius:inherit;
+  padding:1px;
+  background:radial-gradient(240px circle at var(--mx) var(--my),
+              var(--glow), rgba(95,207,142,0.12) 45%, transparent 70%);
+  -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+          mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;
+          mask-composite:exclude;
+  opacity:0;
+  transition:opacity .45s ease;
+  pointer-events:none;
+  z-index:6;
+}
+
+@media (hover:hover) and (pointer:fine){
+  .stack-card:hover::before,
+  .project-card:hover::before,
+  .discord-card:hover::before,
+  .contact-panel:hover::before{ opacity:1; }
+
+  .stack-card:hover::after,
+  .project-card:hover::after,
+  .discord-card:hover::after,
+  .contact-panel:hover::after{ opacity:1; }
+}
+
+/* keep card content above the glow layers (the glare layer is exempt) */
+.stack-card > *:not(.card-glare),
+.discord-card > *:not(.card-glare),
+.contact-panel > *:not(.card-glare),
+.project-body{ position:relative; z-index:2; }
+.project-thumb{ z-index:2; }
+
+/* while a card is being tilted, transform must not be transitioned —
+   the rAF loop is already doing the easing */
+.tilting{ transition:border-color .4s ease, box-shadow .4s ease !important; }
+
+/* the dashed "open slot" card keeps the wash but skips the solid rim */
+.project-card.open-slot::after{ display:none; }
+.project-card.open-slot{ background:radial-gradient(circle at 50% 20%, rgba(95,207,142,0.07), transparent 65%); }
+
+/* the moving sheen tied to the 3D tilt (span injected by JS) */
+.card-glare{
+  position:absolute; inset:0;
+  border-radius:inherit;
+  background:linear-gradient(var(--glare-angle,120deg),
+              rgba(255,255,255,0.10) 0%, rgba(255,255,255,0) 42%);
+  opacity:0;
+  transition:opacity .4s ease;
+  pointer-events:none;
+  z-index:5;
+  mix-blend-mode:overlay;
+}
+@media (hover:hover) and (pointer:fine){
+  .project-card:hover .card-glare,
+  .discord-card:hover .card-glare,
+  .stack-card:hover .card-glare{ opacity:1; }
+}
+
+/* ---------- 2. GRADIENT SURFACES + PANELS ---------- */
+.contact-panel{
+  background:
+    radial-gradient(120% 90% at 50% -10%, rgba(95,207,142,0.11), transparent 58%),
+    var(--grad-panel);
+  isolation:isolate;
+  transform:perspective(1050px) rotateX(var(--fold, 0deg));
+  transform-origin:50% 100%;
+  transition:transform .12s linear, opacity .7s var(--ease-out);
+}
+@media (max-width:760px){ .contact-panel{ transform:none; } }
+.hero-graph .frame{
+  background:var(--grad-panel);
+  box-shadow:0 30px 60px -40px rgba(0,0,0,.9);
+}
+.branch-col{ background:var(--grad-card) !important; }
+.branch-col.you{ background:linear-gradient(150deg,#161a18,#0d100f) !important; }
+.branch-col.partner{ background:linear-gradient(210deg,#161a18,#0d100f) !important; }
+.merge-row{
+  background:linear-gradient(90deg, rgba(95,207,142,0.07), rgba(95,207,142,0.02) 60%, transparent), var(--bg-soft);
+}
+.modal-panel{
+  background:
+    radial-gradient(110% 70% at 50% 0%, rgba(95,207,142,0.10), transparent 60%),
+    var(--grad-panel);
+}
+.tag{
+  background:linear-gradient(180deg, var(--surface-2), var(--surface));
+  transition:border-color .25s ease, color .25s ease, transform .25s ease;
+}
+.project-card:hover .tag,
+.discord-card:hover .tag{ border-color:#31382f; color:var(--text); }
+
+/* stack cards: number gets a gradient chip treatment */
+.stack-card .num{
+  display:inline-block;
+  padding:3px 9px;
+  border-radius:100px;
+  border:1px solid var(--border);
+  background:linear-gradient(180deg, rgba(95,207,142,0.12), rgba(95,207,142,0.03));
+  transition:border-color .35s ease, box-shadow .35s ease;
+}
+.stack-card:hover .num{
+  border-color:var(--green-dim);
+  box-shadow:0 0 16px -4px var(--glow-soft);
+}
+.discord-card-icon{
+  background:linear-gradient(160deg, rgba(95,207,142,0.14), rgba(95,207,142,0.02));
+  transition:box-shadow .4s ease, border-color .4s ease, transform .5s var(--ease-spring);
+}
+.discord-card:hover .discord-card-icon{
+  border-color:var(--green-dim);
+  box-shadow:0 0 26px -6px var(--glow-soft);
+  transform:translateY(-2px) rotate(-4deg);
+}
+
+/* ---------- 3. BUTTON POLISH ---------- */
+.btn{ position:relative; overflow:hidden; isolation:isolate; }
+.btn-primary{
+  background:linear-gradient(135deg, #74dfa4 0%, #5fcf8e 45%, #45b477 100%);
+  box-shadow:0 6px 20px -10px rgba(95,207,142,0.6);
+}
+.btn-primary:hover{
+  box-shadow:0 14px 34px -10px rgba(95,207,142,0.55), 0 0 0 1px rgba(143,227,184,0.35) inset;
+}
+.btn-ghost{
+  background:linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.012));
+}
+.btn-ghost:hover{
+  background:linear-gradient(180deg, rgba(95,207,142,0.10), rgba(95,207,142,0.02));
+  box-shadow:0 10px 28px -18px var(--glow);
+}
+.btn::before{
+  content:"";
+  position:absolute; top:0; bottom:0; left:-140%;
+  width:55%;
+  background:linear-gradient(100deg, transparent, rgba(255,255,255,0.30), transparent);
+  transform:skewX(-18deg);
+  pointer-events:none;
+  z-index:1;
+}
+@media (hover:hover) and (pointer:fine){
+  .btn:hover::before{ animation:btnSheen .75s var(--ease-out) forwards; }
+}
+@keyframes btnSheen{ to{ left:150%; } }
+.btn:active{ transform:translateY(0) scale(.985); }
+
+.visit-btn{
+  background:linear-gradient(180deg, rgba(95,207,142,0.10), rgba(95,207,142,0.02));
+}
+.icon-links a, .footer-social a{
+  background:linear-gradient(180deg, rgba(255,255,255,0.04), transparent);
+}
+.icon-links a:hover{ box-shadow:0 10px 26px -14px var(--glow); }
+
+/* ---------- 4. SCROLL PROGRESS RAIL ---------- */
+#scrollRail{
+  position:fixed; top:0; left:0; right:0;
+  height:2px;
+  z-index:150;
+  background:transparent;
+  pointer-events:none;
+}
+#scrollRail i{
+  display:block; height:100%; width:0%;
+  background:linear-gradient(90deg, var(--green-dim), var(--green) 60%, var(--green-soft));
+  box-shadow:0 0 12px var(--glow);
+  transition:width .12s linear;
+}
+
+/* ---------- 5. BACK TO TOP ---------- */
+#toTop{
+  position:fixed;
+  right:24px;
+  bottom:78px;              /* stacked above the music button */
+  z-index:500;
+  width:44px; height:44px;
+  border-radius:50%;
+  border:1px solid var(--border);
+  background:rgba(10,12,11,0.88);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  color:var(--text-muted);
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; pointer-events:none; transform:translateY(10px) scale(.85);
+  transition:opacity .3s ease, transform .3s var(--ease-spring), border-color .25s ease, color .25s ease, box-shadow .25s ease;
+}
+#toTop.visible{ opacity:1; pointer-events:auto; transform:translateY(0) scale(1); }
+#toTop:hover{
+  border-color:var(--green-dim);
+  color:var(--green-soft);
+  box-shadow:0 0 18px rgba(95,207,142,0.25);
+}
+#toTop svg{ width:17px; height:17px; }
+
+/* ---------- 6. NAV: active section + hamburger ---------- */
+.nav-links a.active{ color:var(--green-soft); }
+.nav-links a.active::after{ width:100%; }
+
+.nav-toggle{
+  width:34px; height:34px;
+  align-items:center; justify-content:center;
+  position:relative;
+  z-index:120;
+}
+.nav-toggle span{
+  transition:transform .35s var(--ease-out), opacity .2s ease, width .3s ease;
+}
+.nav-toggle.open span:nth-child(1){ transform:translateY(6.5px) rotate(45deg); }
+.nav-toggle.open span:nth-child(2){ opacity:0; transform:scaleX(.2); }
+.nav-toggle.open span:nth-child(3){ transform:translateY(-6.5px) rotate(-45deg); }
+
+.mobile-menu{
+  background:
+    radial-gradient(90% 60% at 50% 0%, rgba(95,207,142,0.10), transparent 60%),
+    rgba(10,12,11,0.97);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  padding:0 var(--gutter);
+  transition:opacity .35s ease, visibility .35s ease;
+}
+.mobile-menu a{
+  opacity:0;
+  transform:translateY(14px);
+  transition:opacity .45s var(--ease-out), transform .45s var(--ease-out), color .2s ease;
+}
+.mobile-menu.open a{ opacity:1; transform:translateY(0); }
+.mobile-menu.open a:nth-child(1){ transition-delay:.06s; }
+.mobile-menu.open a:nth-child(2){ transition-delay:.12s; }
+.mobile-menu.open a:nth-child(3){ transition-delay:.18s; }
+.mobile-menu.open a:nth-child(4){ transition-delay:.24s; }
+.mobile-menu.open a:nth-child(5){ transition-delay:.30s; }
+.mobile-menu.open a:nth-child(6){ transition-delay:.36s; }
+.mobile-menu a:not(.btn){ color:var(--text-muted); }
+.mobile-menu a:not(.btn):active{ color:var(--green-soft); }
+
+/* the floating controls must not sit on top of the open menu */
+body.menu-open #toTop,
+body.menu-open #musicBtn{ opacity:0; pointer-events:none; }
+
+/* the availability badge reads as its own line, not trailing the eyebrow */
+.availability-badge{ display:flex; width:fit-content; }
+
+/* =================================================================
+   ▓▓ PROCESS — commit graph ▓▓
+   The section already speaks git, so the structure should too:
+   each step is a commit on a branch rail, and the rails resolve
+   into a lit merge line.
+================================================================= */
+.process{
+  position:relative;
+  transform:perspective(1050px) rotateX(var(--fold, 0deg));
+  transform-origin:50% 100%;
+  transition:transform .12s linear, opacity .7s var(--ease-out);
+  will-change:transform;
+}
+.branch-col{ position:relative; isolation:isolate; --mx:50%; --my:50%; }
+
+/* cursor wash, same language as the cards */
+.branch-col::before{
+  content:"";
+  position:absolute; inset:0;
+  background:radial-gradient(420px circle at var(--mx) var(--my),
+              rgba(95,207,142,0.13), transparent 62%);
+  opacity:0;
+  transition:opacity .45s ease;
+  pointer-events:none;
+  z-index:0;
+}
+@media (hover:hover) and (pointer:fine){
+  .branch-col:hover::before{ opacity:1; }
+}
+.branch-col > *{ position:relative; z-index:1; }
+
+/* branch label → a real git ref pill */
+.branch-tag{
+  display:inline-flex;
+  align-items:center;
+  padding:5px 12px 5px 9px;
+  border:1px solid var(--border);
+  border-radius:100px;
+  background:linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.008));
+  color:var(--text-muted);
+  transition:border-color .35s ease, color .35s ease;
+}
+.branch-col:hover .branch-tag{ border-color:var(--green-dim); color:var(--text); }
+.branch-tag .chip{
+  width:8px; height:8px;
+  border-radius:50%;
+  transition:box-shadow .35s ease;
+}
+/* filled vs hollow — the two branches read apart by form, not by hue */
+.branch-col.you .branch-tag .chip{
+  background:var(--green);
+  box-shadow:0 0 0 3px rgba(95,207,142,0.14);
+}
+.branch-col.partner .branch-tag .chip{
+  background:transparent;
+  border:1.5px solid var(--green);
+  box-shadow:0 0 0 3px rgba(95,207,142,0.08);
+}
+.branch-col:hover .branch-tag .chip{ box-shadow:0 0 0 4px rgba(95,207,142,0.20), 0 0 12px var(--glow); }
+
+.branch-col h4{
+  transition:color .3s ease;
+}
+
+/* the rail every commit hangs off */
+.branch-steps{
+  position:relative;
+  margin-top:26px;
+  padding-left:26px;
+  gap:4px;
+}
+.branch-steps::before{
+  content:"";
+  position:absolute;
+  left:5px; top:14px; bottom:14px;
+  width:1.5px;
+  border-radius:2px;
+  background:linear-gradient(180deg,
+    transparent 0%, var(--grey-line) 14%, var(--grey-line) 70%, var(--green-dim) 100%);
+}
+
+.branch-steps li{
+  position:relative;
+  padding:9px 12px 9px 10px;
+  border-radius:9px;
+  align-items:flex-start;
+  transition:background .3s ease, color .3s ease, transform .35s var(--ease-out);
+}
+/* commit node — absolutely positioned so it never becomes a flex item */
+.branch-steps li::before{
+  content:"";
+  position:absolute;
+  left:-25.25px; top:15px;
+  width:9px; height:9px;
+  border-radius:50%;
+  background:var(--bg-soft);
+  border:1.5px solid var(--grey-line);
+  transition:background .3s ease, border-color .3s ease, box-shadow .35s ease, transform .35s var(--ease-spring);
+  z-index:1;
+}
+.branch-steps li .n{
+  color:var(--text-dim);
+  padding-top:2px;
+  transition:color .3s ease;
+}
+@media (hover:hover) and (pointer:fine){
+  .branch-steps li:hover{
+    background:linear-gradient(90deg, rgba(95,207,142,0.08), rgba(95,207,142,0.01));
+    color:var(--text);
+    transform:translateX(3px);
+  }
+  .branch-steps li:hover::before{
+    background:var(--green);
+    border-color:var(--green);
+    box-shadow:0 0 0 4px rgba(95,207,142,0.16), 0 0 14px var(--glow);
+    transform:scale(1.15);
+  }
+  .branch-steps li:hover .n{ color:var(--green-soft); }
+}
+
+/* steps land one after another, like commits arriving */
+.process.in .branch-steps li{
+  animation:commitIn .55s var(--ease-out) backwards;
+}
+.process.in .branch-col.you .branch-steps li:nth-child(1){ animation-delay:.10s; }
+.process.in .branch-col.you .branch-steps li:nth-child(2){ animation-delay:.20s; }
+.process.in .branch-col.you .branch-steps li:nth-child(3){ animation-delay:.30s; }
+.process.in .branch-col.partner .branch-steps li:nth-child(1){ animation-delay:.16s; }
+.process.in .branch-col.partner .branch-steps li:nth-child(2){ animation-delay:.26s; }
+.process.in .branch-col.partner .branch-steps li:nth-child(3){ animation-delay:.36s; }
+@keyframes commitIn{
+  from{ opacity:0; transform:translateX(-10px); }
+  to  { opacity:1; transform:translateX(0); }
+}
+
+/* the merge line itself — lit, and running */
+.merge-row{
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+  color:var(--green-soft);
+}
+.merge-row::after{
+  content:"";
+  position:absolute; top:0; left:0; right:0;
+  height:1px;
+  background:linear-gradient(90deg, transparent, var(--green) 22%, var(--green) 78%, transparent);
+  opacity:.55;
+  z-index:2;
+}
+.merge-row::before{
+  content:"";
+  position:absolute; top:0; bottom:0;
+  left:0; width:38%;
+  background:linear-gradient(90deg, transparent, rgba(95,207,142,0.14), transparent);
+  transform:translateX(-140%);
+  animation:mergeFlow 5s cubic-bezier(.4,0,.2,1) infinite;
+  pointer-events:none;
+  z-index:0;
+}
+@keyframes mergeFlow{
+  0%      { transform:translateX(-140%); }
+  55%,100%{ transform:translateX(400%); }
+}
+.merge-row svg{
+  position:relative; z-index:2;
+  animation:mergeBeat 3.4s ease-in-out infinite;
+  filter:drop-shadow(0 0 6px rgba(95,207,142,.5));
+}
+@keyframes mergeBeat{
+  0%,100%{ transform:scale(1); opacity:.85; }
+  50%    { transform:scale(1.14); opacity:1; }
+}
+
+@media (max-width:760px){
+  .branch-steps{ padding-left:24px; }
+  .branch-steps li{ padding:8px 8px 8px 8px; }
+  .branch-steps li::before{ left:-23.25px; }
+  .process{ transform:none; }   /* the fold needs room to read */
+}
+@media (prefers-reduced-motion: reduce){
+  .merge-row::before, .merge-row svg{ animation:none; }
+  .process{ transform:none !important; }
+  .process.in .branch-steps li{ animation:none; }
+}
+
+/* =================================================================
+   ▓▓ 3D DEPTH ▓▓
+================================================================= */
+
+/* Layers inside a tilting card drift against the tilt, so the title
+   sits visibly in front of the artwork. Done with translate rather
+   than translateZ: `overflow:hidden` forces `preserve-3d` to flatten,
+   so real Z would silently do nothing here (and in Safari especially). */
+.project-thumb .thumb-title{
+  transform:translate3d(calc(var(--dx,0px) * 2.1), calc(var(--dy,0px) * 2.1), 0);
+  transition:transform .12s linear;
+}
+.project-thumb .thumb-topbar{
+  transform:translate3d(calc(var(--dx,0px) * 1.1), calc(var(--dy,0px) * 1.1), 0);
+  transition:transform .12s linear;
+}
+.project-body .p-tags{
+  transform:translate3d(calc(var(--dx,0px) * 0.8), calc(var(--dy,0px) * 0.8), 0);
+  transition:transform .12s linear;
+}
+.discord-card .discord-stats,
+.discord-card h3{
+  transform:translate3d(calc(var(--dx,0px) * 1.3), calc(var(--dy,0px) * 1.3), 0);
+  transition:transform .12s linear;
+}
+.stack-card h3{
+  transform:translate3d(calc(var(--dx,0px) * 1.4), calc(var(--dy,0px) * 1.4), 0);
+  transition:transform .12s linear;
+}
+
+/* the ambient tech chips tumble in 3D instead of just bobbing */
+.story-visual-col{ perspective:1000px; }
+.tech-float{
+  transform-style:preserve-3d;
+  box-shadow:0 10px 22px -14px rgba(0,0,0,.9);
+}
+@keyframes techFloat{
+  0%,100%{
+    transform:translate(calc(-50% + var(--fx,0px)), var(--fy,0px))
+              rotateY(-18deg) rotateX(7deg);
+  }
+  50%{
+    transform:translate(calc(-50% + var(--fx,0px)), calc(var(--fy,0px) - 12px))
+              rotateY(18deg) rotateX(-7deg);
+  }
+}
+.tech-float:hover{
+  animation-play-state:paused;
+  transform:translate(calc(-50% + var(--fx,0px)), var(--fy,0px)) rotateY(0deg) rotateX(0deg) scale(1.12);
+  transition:transform .4s var(--ease-spring);
+}
+
+@media (prefers-reduced-motion: reduce){
+  .project-thumb .thumb-title, .project-thumb .thumb-topbar,
+  .project-body .p-tags, .discord-card .discord-stats,
+  .discord-card h3, .stack-card h3{ transform:none !important; }
+}
+
+/* =================================================================
+   ▓▓ 3D ENTRANCES ▓▓
+   Elements arrive as planes rotating flat toward the reader instead of
+   just fading. JS swaps `.reveal` for these so the two never fight,
+   then hands over to `.d3-done` once the entrance finishes — that way
+   the long entrance easing never slows down later hover states.
+================================================================= */
+.d3{
+  opacity:0;
+  transform:perspective(1100px) rotateX(17deg) translateY(34px) scale(.955);
+  transform-origin:50% 100%;
+  transition:transform 1s var(--ease-out), opacity .85s ease;
+  will-change:transform, opacity;
+}
+.d3.d3-in{
+  opacity:1;
+  transform:perspective(1100px) rotateX(0deg) translateY(0) scale(1);
+}
+.d3-done{
+  opacity:1;
+  transform:none;
+  transition:transform .38s var(--ease-out), opacity .35s ease,
+             background .4s ease, box-shadow .4s ease, border-color .4s ease;
+}
+.section-head.d3, .section-head.d3-in{ transform-origin:0% 100%; }
+
+@media (prefers-reduced-motion: reduce){
+  .d3{ opacity:1; transform:none; }
+}
+
+/* =================================================================
+   ▓▓ HERO PANEL DEPTH ▓▓
+   The frame tilts as one plane; its contents ride at different rates
+   so the panel reads as a stack of layers, not a printed picture.
+================================================================= */
+.hero-graph .frame .frame-topbar{
+  transform:translate3d(calc(var(--hdx,0px) * 1.5), calc(var(--hdy,0px) * 1.5), 0);
+  transition:transform .12s linear;
+}
+.hero-graph .frame > svg{
+  transform:translate3d(calc(var(--hdx,0px) * 2.6), calc(var(--hdy,0px) * 2.6), 0);
+  transition:transform .12s linear;
+}
+.hero-graph .frame::before{
+  transform:translate3d(calc(var(--hdx,0px) * -1.8), calc(var(--hdy,0px) * -1.8), 0);
+  transition:transform .12s linear;
+}
+/* a cast shadow that slides opposite the tilt — the cue that sells "floating" */
+.hero-graph::after{
+  content:"";
+  position:absolute;
+  left:8%; right:8%; bottom:-26px;
+  height:52px;
+  border-radius:50%;
+  background:radial-gradient(50% 50% at 50% 50%, rgba(95,207,142,0.16), transparent 72%);
+  filter:blur(14px);
+  z-index:-1;
+  pointer-events:none;
+  transform:translate3d(calc(var(--hdx,0px) * -2.4), 0, 0);
+  transition:transform .12s linear;
+}
+
+/* a commit travelling down the merged branch, forever shipping */
+.git-runner{
+  fill:var(--green-soft);
+  animation:runner 4.6s cubic-bezier(.5,0,.5,1) infinite;
+  opacity:0;
+}
+@keyframes runner{
+  0%      { opacity:0; transform:translateX(0); }
+  12%     { opacity:1; }
+  70%     { opacity:1; }
+  100%    { opacity:0; transform:translateX(178px); }
+}
+
+/* =================================================================
+   ▓▓ STORY RING — idle 3D drift ▓▓
+   Pointer input overrides this inline; it resumes on leave.
+================================================================= */
+.story-visual{
+  animation:ringDrift 14s ease-in-out infinite;
+  transform-style:preserve-3d;
+}
+@keyframes ringDrift{
+  0%,100%{ transform:perspective(900px) rotateY(-8deg) rotateX(3.5deg); }
+  50%    { transform:perspective(900px) rotateY(8deg)  rotateX(-3.5deg); }
+}
+@media (prefers-reduced-motion: reduce){
+  .story-visual{ animation:none; }
+  .git-runner{ animation:none; opacity:0; }
+}
+
+/* =================================================================
+   ▓▓ STACK GRID SPOTLIGHT ▓▓
+   Hovering one column pushes the other three back.
+================================================================= */
+@media (hover:hover) and (pointer:fine){
+  .stack-grid:hover .stack-card{ opacity:.5; }
+  .stack-grid:hover .stack-card:hover{ opacity:1; }
+  .projects-grid:hover .project-card{ opacity:.62; }
+  .projects-grid:hover .project-card:hover{ opacity:1; }
+}
+
+/* logo mark flips on its own axis */
+.logo .mark{ transition:transform .55s var(--ease-spring), border-color .3s ease; }
+.logo:hover .mark{ transform:perspective(400px) rotateY(180deg); }
+
+/* ---------- 7. HEADLINE REVEAL ---------- */
+.line-mask{
+  display:block;
+  overflow:hidden;
+  padding-bottom:.14em;      /* room for descenders inside the mask */
+  margin-bottom:-.14em;
+}
+.line-mask > span{
+  display:block;
+  transform:translateY(105%);
+  opacity:0;
+  transition:transform .9s var(--ease-out), opacity .9s var(--ease-out);
+}
+.line-mask.in > span{ transform:translateY(0); opacity:1; }
+
+/* ---------- 8. AMBIENT DEPTH ---------- */
+.hero{ position:relative; }
+.hero::before{
+  content:"";
+  position:absolute;
+  top:6%; left:-12%;
+  width:min(520px, 84%);
+  aspect-ratio:1;
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(95,207,142,0.10), transparent 68%);
+  filter:blur(30px);
+  pointer-events:none;
+  z-index:-1;
+  animation:heroDrift 14s ease-in-out infinite;
+}
+@keyframes heroDrift{
+  0%,100%{ transform:translate(0,0) scale(1); opacity:.85; }
+  50%    { transform:translate(40px,-26px) scale(1.08); opacity:1; }
+}
+
+/* very fine grain, desktop only — stops flat panels reading as plastic */
+#grain{
+  position:fixed; inset:0;
+  z-index:400;
+  pointer-events:none;
+  opacity:.045;
+  mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+@media (max-width:900px){ #grain{ display:none; } }
+
+/* ticker: pause when the reader wants to actually read it */
+.ticker-track:hover{ animation-play-state:paused; }
+.ticker-section{
+  background:linear-gradient(180deg, var(--bg-soft), #0b0e0d);
+  -webkit-mask-image:linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+          mask-image:linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+/* stat count-up sits on tabular figures so it doesn't jitter while counting */
+.hero-stats .stat b, .discord-stats .stat b{ font-variant-numeric:tabular-nums; }
+
+/* ---------- 9. MOBILE ---------- */
+@media (max-width:900px){
+  /* tilt/parallax is pointer-only; make sure nothing is left rotated */
+  .project-card, .discord-card, .stack-card, .hero-graph .frame, .story-visual{
+    transform:none !important;
+  }
+  .card-glare{ display:none; }
+}
+
+@media (max-width:768px){
+  .section-head{ margin-bottom:36px; }
+  .section-head p{ font-size:15px; }
+  .hero{ padding:132px 0 76px; gap:32px; }
+  .hero-copy p.lead{ font-size:16px; }
+  .hero-stats{ margin-top:38px; padding-top:22px; gap:20px 26px; }
+  .stack-card{ padding:26px 22px; }
+  .discord-card{ padding:26px 22px; }
+  .branch-col{ padding:28px 22px; }
+  .merge-row{ padding:22px; align-items:flex-start; }
+  .projects-grid, .discord-grid{ gap:18px; }
+  .ticker-track{ gap:38px; }
+  .ticker-track span{ font-size:13px; }
+  .contact-panel{ padding:48px 26px; border-radius:16px; }
+}
+
+@media (max-width:560px){
+  .hero{ padding-top:120px; }
+  .hero-copy h1{ font-size:clamp(32px,8.4vw,42px); }
+  .hero-stats{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:14px;
+  }
+  .hero-stats .stat b{ font-size:20px; }
+  .hero-stats .stat span{ font-size:10.5px; line-height:1.35; display:block; }
+  .availability-badge{ font-size:11.5px; }
+  .project-thumb{ height:150px; }
+  .project-thumb .thumb-title{ font-size:19px; }
+  .project-body{ padding:18px; }
+  .discord-stats{ gap:20px; }
+  .discord-stats .stat b{ font-size:22px; }
+  .tag{ font-size:11px; padding:4px 8px; }
+  .eyebrow{ font-size:12px; }
+
+  /* controls out of the thumb-zone and away from each other */
+  #musicBtn{ right:16px; bottom:16px; width:40px; height:40px; }
+  #toTop{ right:16px; bottom:64px; width:40px; height:40px; }
+}
+
+@media (max-width:360px){
+  .hero-stats{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .footer-nav{ gap:16px; }
+}
+
+/* iOS: 16px inputs stop the auto-zoom that breaks the modal layout */
+@media (max-width:768px){
+  .form-row input, .form-row select, .form-row textarea{ font-size:16px; }
+  .modal-overlay{ padding:16px; align-items:flex-end; }
+  .modal-panel{ max-height:86dvh; border-radius:18px 18px 12px 12px; }
+}
+
+/* dynamic viewport units — no more clipped overlays behind mobile browser chrome */
+@supports (height:100dvh){
+  #loader, #welcomeOverlay, .mobile-menu{ height:100dvh; }
+  .story-visual-col{ height:100dvh; }
+}
+@media (max-width:960px){
+  @supports (height:100dvh){ .story-visual-col{ height:auto; } }
+}
+
+/* touch devices get a press state, since they never get :hover */
+@media (hover:none){
+  .project-card:active, .discord-card:active, .stack-card:active{
+    border-color:var(--green-dim);
+    background:var(--grad-card-hi);
+  }
+  .project-card:active::before, .discord-card:active::before, .stack-card:active::before{ opacity:1; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .line-mask > span{ transform:none; opacity:1; }
+  .hero::before{ animation:none; }
+  .card-glare{ display:none; }
+}
 </style>
 </head>
 <body>
@@ -1358,6 +2196,19 @@ footer{
 
 <!-- ============================= NETWORK DOTS CANVAS ============================= -->
 <canvas id="netCanvas"></canvas>
+
+<!-- ============================= SCROLL PROGRESS RAIL ============================= -->
+<div id="scrollRail" aria-hidden="true"><i></i></div>
+
+<!-- ============================= FILM GRAIN (desktop only) ============================= -->
+<div id="grain" aria-hidden="true"></div>
+
+<!-- ============================= BACK TO TOP ============================= -->
+<button id="toTop" aria-label="Back to top">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 19V5M5 12l7-7 7 7"/>
+  </svg>
+</button>
 
 <!-- ============================= BACKGROUND MUSIC ============================= -->
 <!-- To add music: set the src attribute of the audio element to your music file path -->
@@ -1390,7 +2241,7 @@ footer{
         <span class="mark">
           <svg viewBox="0 0 24 24" fill="none" stroke="#5fcf8e" stroke-width="2" stroke-linecap="round"><circle cx="6" cy="6" r="2.4"/><circle cx="6" cy="18" r="2.4"/><circle cx="18" cy="12" r="2.4"/><path d="M6 8.4V15.6M8 6.9C11 6.9 15.7 8.5 15.9 10.4M8 17.1c3-.1 7.7-1.7 7.9-3.6"/></svg>
         </span>
-        veileds<span class="amp">.xyz</span>
+        <span class="wordmark">veileds<span class="amp">.xyz</span></span>
       </a>
       <ul class="nav-links">
         <li><a href="#work">Work</a></li>
@@ -1428,7 +2279,10 @@ footer{
         <span class="dot"></span>
         <span class="status-text" id="availabilityText">Available for projects</span>
       </div>
-      <h1>Two developers.<br>One clean <span class="fade">commit</span> history.</h1>
+      <h1>
+        <span class="line-mask"><span>Two developers.</span></span>
+        <span class="line-mask"><span>One clean <span class="fade">commit</span> history.</span></span>
+      </h1>
       <p class="lead">We're a two-person full-stack studio — one shared codebase, shared ownership, and no work lost in handoffs. Five years of building and shipping real products for real clients.</p>
       <div class="hero-actions">
         <a href="#work" class="btn btn-primary">See the work</a>
@@ -1447,13 +2301,14 @@ footer{
           <span>graph.log</span>
           <div class="frame-dots"><span></span><span></span><span></span></div>
         </div>
-        <svg viewBox="0 0 460 220" width="100%" height="auto">
+        <svg viewBox="0 0 460 220" width="100%" style="height:auto;">
           <!-- grey branch: frontend -->
           <path class="git-line draw" d="M20,55 C160,55 190,110 235,110" />
           <!-- grey branch: backend (equal weight to frontend) -->
           <path class="git-line draw draw-delay" d="M20,175 C160,175 190,110 235,110" />
           <!-- merged trunk: this is the only accented part, since it's the shared result -->
           <path class="git-line-accent draw" style="animation-delay:.9s" d="M235,110 C300,110 340,110 420,110" />
+          <circle class="git-runner" cx="240" cy="110" r="3.4"/>
 
           <text x="26" y="42" class="git-label">frontend</text>
           <text x="26" y="196" class="git-label">backend</text>
@@ -1744,7 +2599,7 @@ footer{
         <span class="mark">
           <svg viewBox="0 0 24 24" fill="none" stroke="#5fcf8e" stroke-width="2" stroke-linecap="round"><circle cx="6" cy="6" r="2.4"/><circle cx="6" cy="18" r="2.4"/><circle cx="18" cy="12" r="2.4"/><path d="M6 8.4V15.6M8 6.9C11 6.9 15.7 8.5 15.9 10.4M8 17.1c3-.1 7.7-1.7 7.9-3.6"/></svg>
         </span>
-        veileds<span class="amp">.xyz</span>
+        <span class="wordmark">veileds<span class="amp">.xyz</span></span>
       </a>
       <ul class="footer-nav">
         <li><a href="#work">Work</a></li>
@@ -1950,17 +2805,27 @@ footer{
   const canvas = document.getElementById('netCanvas');
   const ctx    = canvas.getContext('2d');
 
-  const DOT_COUNT   = 80;
-  const MAX_DIST    = 160;
+  const SMALL       = window.innerWidth < 760;
+  const REDUCE      = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // O(n²) link check — a phone can't afford 80 dots, so scale the field down
+  const DOT_COUNT   = SMALL ? 32 : 80;
+  const MAX_DIST    = SMALL ? 120 : 160;
   const DOT_RADIUS  = 1.5;
   const DOT_COLOR   = 'rgba(95,207,142,';   // green accent
   const LINE_COLOR  = 'rgba(95,207,142,';
 
-  let W, H, dots;
+  let W, H, dots, running = true, lastW = 0;
 
   function resize(){
-    W = canvas.width  = window.innerWidth;
-    H = canvas.height = window.innerHeight;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width  = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width  = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    lastW = W;
   }
 
   function makeDot(){
@@ -2014,15 +2879,27 @@ footer{
       ctx.fill();
     }
 
-    requestAnimationFrame(draw);
+    if (running) requestAnimationFrame(draw);
   }
 
+  // Mobile browsers fire resize every time the URL bar hides — only
+  // rebuild when the width actually changes, otherwise it stutters.
   window.addEventListener('resize', () => {
-    resize();
+    if (Math.abs(window.innerWidth - lastW) > 1) resize();
+  });
+
+  // don't burn battery in a background tab
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      running = false;
+    } else if (!running) {
+      running = true;
+      requestAnimationFrame(draw);
+    }
   });
 
   init();
-  draw();
+  if (!REDUCE) draw();
 })();
 
 /* =================================================================
@@ -2251,10 +3128,32 @@ window.addEventListener('scroll', () => {
 }, { passive: true });
 
 /* mobile menu */
-const navToggle = document.getElementById('navToggle');
-const mobileMenu = document.getElementById('mobileMenu');
-navToggle.addEventListener('click', () => mobileMenu.classList.toggle('open'));
-mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => mobileMenu.classList.remove('open')));
+(function initMobileMenu(){
+  const navToggle  = document.getElementById('navToggle');
+  const mobileMenu = document.getElementById('mobileMenu');
+  if (!navToggle || !mobileMenu) return;
+
+  function setOpen(open){
+    mobileMenu.classList.toggle('open', open);
+    navToggle.classList.toggle('open', open);
+    navToggle.setAttribute('aria-expanded', String(open));
+    navToggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    // lock the page behind the overlay so it can't scroll under your thumb
+    document.body.style.overflow = open ? 'hidden' : '';
+    document.body.classList.toggle('menu-open', open);
+  }
+
+  navToggle.setAttribute('aria-expanded', 'false');
+  navToggle.addEventListener('click', () => setOpen(!mobileMenu.classList.contains('open')));
+  mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setOpen(false)));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && mobileMenu.classList.contains('open')) setOpen(false);
+  });
+  // rotating the phone back to landscape/desktop shouldn't leave it stuck open
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 860 && mobileMenu.classList.contains('open')) setOpen(false);
+  });
+})();
 
 /* scroll reveal */
 const revealEls = document.querySelectorAll('.reveal');
@@ -2309,47 +3208,387 @@ document.getElementById('year').textContent = new Date().getFullYear();
 })();
 
 /* =================================================================
-   3D TILT EFFECTS
+   ENVIRONMENT FLAGS
 ================================================================= */
-const canTilt = window.matchMedia('(hover: hover) and (pointer: fine)').matches
-  && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const REDUCED  = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const FINE_PTR = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+const canTilt  = FINE_PTR && !REDUCED;
 
-if (canTilt) {
-  function addTilt(el, { max = 9, lift = -6, scale = 1 } = {}) {
-    el.addEventListener('mousemove', (e) => {
-      const r = el.getBoundingClientRect();
-      const px = (e.clientX - r.left) / r.width;
-      const py = (e.clientY - r.top) / r.height;
-      const rx = (0.5 - py) * max;
-      const ry = (px - 0.5) * max;
-      el.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(${lift}px) scale(${scale})`;
+/* =================================================================
+   CARD GLOW + 3D TILT
+   One rAF loop drives every card: the pointer position feeds both the
+   CSS glow (--mx/--my) and an eased rotation, so the card never snaps.
+================================================================= */
+(function initCards(){
+  const cards = [
+    ...document.querySelectorAll('.project-card:not(.open-slot)'),
+    ...document.querySelectorAll('.discord-card'),
+    ...document.querySelectorAll('.stack-card'),
+    ...document.querySelectorAll('.contact-panel'),
+    ...document.querySelectorAll('.project-card.open-slot')
+  ];
+  if (!cards.length) return;
+
+  const TILT = {
+    'project-card': { max: 7,   lift: -8 },
+    'discord-card': { max: 5.5, lift: -5 },
+    'stack-card':   { max: 4.5, lift: -3 },
+    'contact-panel':{ max: 0,   lift: 0  }
+  };
+
+  cards.forEach(card => {
+    // glare layer (skipped where there's nothing to catch the light)
+    if (canTilt && !card.classList.contains('contact-panel')) {
+      const glare = document.createElement('span');
+      glare.className = 'card-glare';
+      card.appendChild(glare);
+      card._glare = glare;
+    }
+
+    const key = ['project-card','discord-card','stack-card','contact-panel']
+      .find(k => card.classList.contains(k)) || 'stack-card';
+    const cfg = TILT[key];
+
+    let target = { rx: 0, ry: 0, lift: 0 };
+    let curr   = { rx: 0, ry: 0, lift: 0 };
+    let raf = null, active = false;
+
+    function frame(){
+      curr.rx   += (target.rx   - curr.rx)   * 0.12;
+      curr.ry   += (target.ry   - curr.ry)   * 0.12;
+      curr.lift += (target.lift - curr.lift) * 0.12;
+
+      if (canTilt && cfg.max) {
+        card.style.transform =
+          `perspective(1000px) rotateX(${curr.rx.toFixed(2)}deg) rotateY(${curr.ry.toFixed(2)}deg) translateY(${curr.lift.toFixed(2)}px)`;
+      }
+      if (card._glare) {
+        card._glare.style.setProperty('--glare-angle', `${120 + curr.ry * 4}deg`);
+      }
+      // inner layers drift against the tilt to build depth
+      card.style.setProperty('--dx', (curr.ry * 0.85).toFixed(2) + 'px');
+      card.style.setProperty('--dy', (-curr.rx * 0.85).toFixed(2) + 'px');
+
+      const settled = Math.abs(target.rx - curr.rx) < 0.02
+                   && Math.abs(target.ry - curr.ry) < 0.02
+                   && Math.abs(target.lift - curr.lift) < 0.05;
+
+      if (!settled || active) {
+        raf = requestAnimationFrame(frame);
+      } else {
+        raf = null;
+        if (canTilt && cfg.max) card.style.transform = '';
+        card.classList.remove('tilting');
+      }
+    }
+
+    function start(){ if (!raf) raf = requestAnimationFrame(frame); }
+
+    card.addEventListener('pointermove', (e) => {
+      const r = card.getBoundingClientRect();
+      const x = e.clientX - r.left;
+      const y = e.clientY - r.top;
+
+      // glow position — works on touch too
+      card.style.setProperty('--mx', x.toFixed(0) + 'px');
+      card.style.setProperty('--my', y.toFixed(0) + 'px');
+
+      if (!canTilt || !cfg.max) return;
+      active = true;
+      card.classList.add('tilting');
+      target.rx   = (0.5 - y / r.height) * cfg.max;
+      target.ry   = (x / r.width - 0.5) * cfg.max;
+      target.lift = cfg.lift;
+      start();
+    }, { passive: true });
+
+    card.addEventListener('pointerleave', () => {
+      active = false;
+      target = { rx: 0, ry: 0, lift: 0 };
+      start();
     });
-    el.addEventListener('mouseleave', () => { el.style.transform = ''; });
+  });
+})();
+
+/* =================================================================
+   HERO PANEL PARALLAX — tracks the whole hero, not just the panel,
+   so the graph reacts before the cursor reaches it.
+================================================================= */
+(function initHeroParallax(){
+  if (!canTilt) return;
+  const frame = document.querySelector('.hero-graph .frame');
+  const hero  = document.querySelector('.hero');
+  if (!frame || !hero) return;
+
+  let tx = 0, ty = 0, cx = 0, cy = 0, raf = null;
+
+  function loop(){
+    cx += (tx - cx) * 0.08;
+    cy += (ty - cy) * 0.08;
+    frame.style.transform = `perspective(1000px) rotateX(${cy.toFixed(2)}deg) rotateY(${cx.toFixed(2)}deg)`;
+    // inner layers ride at their own rates to build depth
+    const host = frame.parentElement;
+    host.style.setProperty('--hdx', (cx * 0.9).toFixed(2) + 'px');
+    host.style.setProperty('--hdy', (-cy * 0.9).toFixed(2) + 'px');
+    if (Math.abs(tx - cx) > 0.02 || Math.abs(ty - cy) > 0.02) {
+      raf = requestAnimationFrame(loop);
+    } else { raf = null; }
   }
+  function kick(){ if (!raf) raf = requestAnimationFrame(loop); }
 
-  document.querySelectorAll('.project-card:not(.open-slot)').forEach(el => addTilt(el, { max: 8, lift: -6 }));
-  document.querySelectorAll('.discord-card').forEach(el => addTilt(el, { max: 7, lift: -4 }));
-  document.querySelectorAll('.stack-card').forEach(el => addTilt(el, { max: 6, lift: -3, scale: 1.02 }));
+  hero.addEventListener('pointermove', (e) => {
+    const r = hero.getBoundingClientRect();
+    tx = ((e.clientX - r.left) / r.width  - 0.5) * 9;
+    ty = (0.5 - (e.clientY - r.top) / r.height) * 7;
+    kick();
+  }, { passive: true });
 
-  const storyVisual = document.getElementById('storyVisual');
-  if (storyVisual) addTilt(storyVisual, { max: 10, lift: 0 });
+  hero.addEventListener('pointerleave', () => { tx = 0; ty = 0; kick(); });
+})();
 
-  const heroFrame = document.querySelector('.hero-graph .frame');
-  const heroGraphWrap = document.getElementById('heroGraph');
-  if (heroFrame && heroGraphWrap) {
-    heroGraphWrap.addEventListener('mousemove', (e) => {
-      const r = heroGraphWrap.getBoundingClientRect();
-      const px = (e.clientX - r.left) / r.width;
-      const py = (e.clientY - r.top) / r.height;
-      const rx = (0.5 - py) * 10;
-      const ry = (px - 0.5) * 10;
-      heroFrame.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+/* =================================================================
+   3D SCROLL ENTRANCES
+   Takes ownership of `.reveal` on these elements so the two systems
+   can't fight over `transform`, then releases to `.d3-done` once the
+   entrance is over — otherwise the 1s entrance easing would also
+   apply to every later hover, making hovers feel sluggish.
+================================================================= */
+(function initEntrances(){
+  const GROUPS = [
+    ['.section-head', 0],
+    ['.stack-card', 70],
+    ['#work .project-card', 90],
+    ['.discord-card', 90],
+    ['.branch-col', 110]
+  ];
+
+  GROUPS.forEach(([sel, stagger]) => {
+    const els = [...document.querySelectorAll(sel)];
+    if (!els.length) return;
+
+    els.forEach((el, i) => {
+      el.classList.remove('reveal');
+      if (REDUCED) { el.classList.add('d3-done'); return; }
+      el.classList.add('d3');
+      el._delay = (i % 4) * stagger;
     });
-    heroGraphWrap.addEventListener('mouseleave', () => {
-      heroFrame.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg)';
-    });
+
+    if (REDUCED) return;
+
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const el = entry.target;
+        io.unobserve(el);
+        setTimeout(() => {
+          el.classList.add('d3-in');
+          // hand off once the entrance has played out
+          setTimeout(() => {
+            el.classList.remove('d3', 'd3-in');
+            el.classList.add('d3-done');
+          }, 1100);
+        }, el._delay);
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+
+    els.forEach(el => io.observe(el));
+  })
+})();
+
+/* =================================================================
+   SCROLL-DRIVEN FOLD
+   Panels lean back slightly and settle flat as they rise into view.
+================================================================= */
+function attachFold(selector, maxDeg){
+  const panel = document.querySelector(selector);
+  if (!panel || REDUCED || window.innerWidth <= 760) return;
+  let ticking = false;
+
+  function update(){
+    const r = panel.getBoundingClientRect();
+    const vh = window.innerHeight;
+    const p = Math.min(1, Math.max(0, (vh - r.top) / (vh * 0.75)));
+    panel.style.setProperty('--fold', ((1 - p) * maxDeg).toFixed(2) + 'deg');
+    ticking = false;
   }
+  window.addEventListener('scroll', () => {
+    if (!ticking) { ticking = true; requestAnimationFrame(update); }
+  }, { passive: true });
+  window.addEventListener('resize', update, { passive: true });
+  update();
 }
+
+/* =================================================================
+   STORY RING TILT
+================================================================= */
+(function initStoryTilt(){
+  if (!canTilt) return;
+  const el = document.getElementById('storyVisual');
+  if (!el) return;
+  el.addEventListener('pointermove', (e) => {
+    const r = el.getBoundingClientRect();
+    const rx = (0.5 - (e.clientY - r.top) / r.height) * 12;
+    const ry = ((e.clientX - r.left) / r.width - 0.5) * 12;
+    el.style.transform = `perspective(900px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`;
+  }, { passive: true });
+  el.addEventListener('pointerleave', () => {
+    el.style.transition = 'transform .6s cubic-bezier(.16,.84,.44,1)';
+    el.style.transform = '';
+    setTimeout(() => { el.style.transition = ''; }, 650);
+  });
+})();
+
+/* =================================================================
+   MAGNETIC BUTTONS
+================================================================= */
+(function initMagnets(){
+  if (!canTilt) return;
+  const magnets = document.querySelectorAll('.btn, .icon-links a, .footer-social a, #toTop, #musicBtn, .visit-btn');
+  magnets.forEach(el => {
+    const pull = el.classList.contains('btn') ? 5 : 4;
+    el.addEventListener('pointermove', (e) => {
+      const r = el.getBoundingClientRect();
+      const x = ((e.clientX - r.left) / r.width  - 0.5) * pull * 2;
+      const y = ((e.clientY - r.top)  / r.height - 0.5) * pull * 2;
+      el.style.transform = `translate(${x.toFixed(1)}px, ${(y - 2).toFixed(1)}px)`;
+    }, { passive: true });
+    el.addEventListener('pointerleave', () => { el.style.transform = ''; });
+  });
+})();
+
+/* =================================================================
+   SCROLL PROGRESS RAIL + BACK TO TOP
+================================================================= */
+(function initScrollUI(){
+  const bar   = document.querySelector('#scrollRail i');
+  const toTop = document.getElementById('toTop');
+  let ticking = false;
+
+  function update(){
+    const doc = document.documentElement;
+    const max = doc.scrollHeight - window.innerHeight;
+    const pct = max > 0 ? (window.scrollY / max) * 100 : 0;
+    if (bar) bar.style.width = pct.toFixed(2) + '%';
+    if (toTop) toTop.classList.toggle('visible', window.scrollY > window.innerHeight * 0.8);
+    ticking = false;
+  }
+
+  window.addEventListener('scroll', () => {
+    if (!ticking) { ticking = true; requestAnimationFrame(update); }
+  }, { passive: true });
+
+  if (toTop) {
+    toTop.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: REDUCED ? 'auto' : 'smooth' });
+    });
+  }
+  update();
+})();
+
+/* =================================================================
+   NAV SCROLLSPY
+================================================================= */
+(function initScrollSpy(){
+  const links = [...document.querySelectorAll('.nav-links a')];
+  if (!links.length) return;
+  const map = new Map();
+  links.forEach(a => {
+    const id = a.getAttribute('href');
+    if (id && id.startsWith('#')) {
+      const sec = document.querySelector(id);
+      if (sec) map.set(sec, a);
+    }
+  });
+  if (!map.size) return;
+
+  const spy = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        links.forEach(a => a.classList.remove('active'));
+        const link = map.get(entry.target);
+        if (link) link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
+
+  map.forEach((_, sec) => spy.observe(sec));
+})();
+
+/* =================================================================
+   HEADLINE LINE REVEAL
+================================================================= */
+(function initLineReveal(){
+  const lines = document.querySelectorAll('.line-mask');
+  if (!lines.length) return;
+  lines.forEach((l, i) => {
+    l.querySelector('span').style.transitionDelay = (0.08 + i * 0.12) + 's';
+  });
+  // hero is above the fold — reveal once the loader hands over
+  const show = () => lines.forEach(l => l.classList.add('in'));
+  const loaderBtn = document.getElementById('loaderContinue');
+  if (loaderBtn) {
+    loaderBtn.addEventListener('click', () => setTimeout(show, 400));
+    setTimeout(show, 12000); // safety net if the loader is ever skipped
+  } else {
+    setTimeout(show, 200);
+  }
+})();
+
+/* =================================================================
+   PROCESS PANEL — cursor wash on each branch + scroll-driven fold
+================================================================= */
+(function initProcess(){
+  document.querySelectorAll('.branch-col').forEach(col => {
+    col.addEventListener('pointermove', (e) => {
+      const r = col.getBoundingClientRect();
+      col.style.setProperty('--mx', (e.clientX - r.left).toFixed(0) + 'px');
+      col.style.setProperty('--my', (e.clientY - r.top).toFixed(0) + 'px');
+    }, { passive: true });
+  });
+
+  attachFold('.process', 10);
+  attachFold('.contact-panel', 7);
+})();
+
+/* =================================================================
+   STAT COUNT-UP  (05+ → counts to 5, $10K+ → counts to 10)
+================================================================= */
+(function initCounters(){
+  const stats = document.querySelectorAll('.hero-stats .stat b, .discord-stats .stat b');
+  if (!stats.length) return;
+
+  function run(el){
+    const raw = el.textContent.trim();
+    const m = raw.match(/^(\D*)(\d+(?:\.\d+)?)(.*)$/);
+    if (!m) return;
+    const [, prefix, numStr, suffix] = m;
+    const end = parseFloat(numStr);
+    const pad = numStr.startsWith('0') ? numStr.split('.')[0].length : 0;
+    const dec = (numStr.split('.')[1] || '').length;
+
+    if (REDUCED) return;
+    const DUR = 1100;
+    const t0 = performance.now();
+
+    function step(now){
+      const p = Math.min(1, (now - t0) / DUR);
+      const eased = 1 - Math.pow(1 - p, 3);
+      let val = (end * eased).toFixed(dec);
+      if (pad) val = String(val).padStart(pad, '0');
+      el.textContent = prefix + val + suffix;
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { run(e.target); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.6 });
+
+  stats.forEach(s => io.observe(s));
+})();
 </script>
 
 </body>
